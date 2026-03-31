@@ -1,15 +1,18 @@
 import '../models/exercise_model.dart';
 import '../models/example_sentence_model.dart';
 import '../models/note_model.dart';
+import '../models/theme_model.dart';
 import '../models/word_model.dart';
 import 'mock_exercises.dart';
 import 'mock_notes.dart';
+import 'mock_themes.dart';
 import 'mock_words.dart';
 
 abstract class LearningLocalDatasource {
   Future<List<WordModel>> fetchWords();
   Future<WordModel?> fetchWordById(String id);
   Future<List<ExerciseModel>> fetchExercises();
+  Future<List<ThemeModel>> fetchThemes();
   Future<List<ExampleSentenceModel>> fetchExamplesByWordId(String wordId);
   Future<List<NoteModel>> fetchNotes();
   Future<void> upsertNote(NoteModel note);
@@ -20,7 +23,10 @@ class LearningLocalDatasourceImpl implements LearningLocalDatasource {
   LearningLocalDatasourceImpl();
 
   final List<WordModel> _words = List<WordModel>.from(mockWords);
-  final List<ExerciseModel> _exercises = List<ExerciseModel>.from(mockExercises);
+  final List<ExerciseModel> _exercises = List<ExerciseModel>.from(
+    mockExercises,
+  );
+  final List<ThemeModel> _themes = List<ThemeModel>.from(mockThemes);
   final Map<String, List<ExampleSentenceModel>> _examplesByWordId =
       <String, List<ExampleSentenceModel>>{...mockWordExamples};
   final List<NoteModel> _notes = List<NoteModel>.from(mockNotes);
@@ -46,7 +52,14 @@ class LearningLocalDatasourceImpl implements LearningLocalDatasource {
   }
 
   @override
-  Future<List<ExampleSentenceModel>> fetchExamplesByWordId(String wordId) async {
+  Future<List<ThemeModel>> fetchThemes() async {
+    return List<ThemeModel>.from(_themes);
+  }
+
+  @override
+  Future<List<ExampleSentenceModel>> fetchExamplesByWordId(
+    String wordId,
+  ) async {
     return List<ExampleSentenceModel>.from(
       _examplesByWordId[wordId] ?? <ExampleSentenceModel>[],
     );
