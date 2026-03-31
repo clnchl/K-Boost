@@ -11,18 +11,27 @@ WordEntity sampleWord({
   String id = 'w1',
   String word = '사람',
   String translation = 'personne',
+  String romanization = 'saram',
+  String category = 'subject',
+  String? particle = '은/는',
+  String definition = 'Un être humain.',
+  int difficulty = 1,
+  String? audioUrl,
+  String lessonId = 'l1',
+  Map<WordTense, Map<PolitenessLevel, String>>? politenessByTense,
 }) {
   return WordEntity(
     id: id,
     word: word,
     translation: translation,
-    romanization: 'saram',
-    category: 'subject',
-    particle: '은/는',
-    definition: 'Un etre humain.',
-    difficulty: 1,
-    audioUrl: null,
-    lessonId: 'l1',
+    romanization: romanization,
+    category: category,
+    particle: particle,
+    definition: definition,
+    difficulty: difficulty,
+    audioUrl: audioUrl,
+    lessonId: lessonId,
+    politenessByTense: politenessByTense ?? WordEntity.defaultPolitenessByTense,
   );
 }
 
@@ -70,10 +79,8 @@ NoteEntity sampleNote({
 }
 
 class FakeWordRepository implements WordRepository {
-  FakeWordRepository({
-    List<WordEntity>? initialWords,
-    this.error,
-  }) : words = initialWords ?? <WordEntity>[];
+  FakeWordRepository({List<WordEntity>? initialWords, this.error})
+    : words = initialWords ?? <WordEntity>[];
 
   final List<WordEntity> words;
   Object? error;
@@ -100,10 +107,8 @@ class FakeWordRepository implements WordRepository {
 }
 
 class FakeExerciseRepository implements ExerciseRepository {
-  FakeExerciseRepository({
-    List<ExerciseEntity>? initialExercises,
-    this.error,
-  }) : exercises = initialExercises ?? <ExerciseEntity>[];
+  FakeExerciseRepository({List<ExerciseEntity>? initialExercises, this.error})
+    : exercises = initialExercises ?? <ExerciseEntity>[];
 
   final List<ExerciseEntity> exercises;
   Object? error;
@@ -119,10 +124,8 @@ class FakeExerciseRepository implements ExerciseRepository {
 }
 
 class FakeNoteRepository implements NoteRepository {
-  FakeNoteRepository({
-    List<NoteEntity>? initialNotes,
-    this.getNotesError,
-  }) : notes = initialNotes ?? <NoteEntity>[];
+  FakeNoteRepository({List<NoteEntity>? initialNotes, this.getNotesError})
+    : notes = initialNotes ?? <NoteEntity>[];
 
   final List<NoteEntity> notes;
   Object? getNotesError;
@@ -164,7 +167,7 @@ class FakeExampleSentenceRepository implements ExampleSentenceRepository {
     Map<String, List<ExampleSentenceEntity>>? initialExamples,
     this.error,
   }) : examplesByWordId =
-            initialExamples ?? <String, List<ExampleSentenceEntity>>{};
+           initialExamples ?? <String, List<ExampleSentenceEntity>>{};
 
   final Map<String, List<ExampleSentenceEntity>> examplesByWordId;
   Object? error;
