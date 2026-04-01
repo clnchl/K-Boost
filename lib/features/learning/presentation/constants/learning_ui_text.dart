@@ -28,10 +28,6 @@ class LearningUiText {
   static const String detailNoExamples = 'Aucun exemple disponible.';
   static const String detailExamplesLoadError =
       'Impossible de charger les exemples.';
-  static const String detailReadMode = 'Mode lecture';
   static const String detailPracticeWord = 'Pratiquer ce mot';
-  static const String detailAddFavorites = 'Ajouter aux favoris';
   static const String detailFavoritesSoon = 'Favoris: bientot disponible.';
-  static const String detailAddFavoritesSoon =
-      'Ajout favoris: bientot disponible.';
 }

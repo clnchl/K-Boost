@@ -4,9 +4,11 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../domain/entities/example_sentence.dart';
+import '../../domain/entities/particle_info.dart';
 import '../../domain/entities/word.dart';
 import '../constants/learning_ui_text.dart';
 import '../utils/word_display_mapper.dart';
+import '../viewmodels/learning_providers.dart';
 import '../viewmodels/word_by_id_viewmodel.dart';
 import '../viewmodels/word_detail_viewmodel.dart';
 import 'course_screen.dart';
@@ -34,6 +36,9 @@ class _WordDetailScreenState extends ConsumerState<WordDetailScreen> {
     );
     final AsyncValue<List<ExampleSentenceEntity>> examplesState = ref.watch(
       wordDetailViewModelProvider(widget.wordId),
+    );
+    final Map<String, ParticleInfoEntity> particleInfoByForm = ref.watch(
+      particleInfoByFormProvider,
     );
 
     return Scaffold(
@@ -85,10 +90,13 @@ class _WordDetailScreenState extends ConsumerState<WordDetailScreen> {
                                 runSpacing: 8,
                                 children: _particlesFromWord(word.particle)
                                     .map(
-                                      (String particle) => _Pill(
-                                        label: particle,
-                                        color: const Color(0xFF2563EB),
-                                        outlined: true,
+                                      (String particle) => _buildParticlePill(
+                                        context,
+                                        particle,
+                                        _resolveParticleInfo(
+                                          particle,
+                                          particleInfoByForm,
+                                        ),
                                       ),
                                     )
                                     .toList(),
@@ -406,37 +414,6 @@ class _WordDetailScreenState extends ConsumerState<WordDetailScreen> {
               fontWeight: FontWeight.w700,
             ),
           ),
-          const SizedBox(height: 14),
-          Container(
-            padding: const EdgeInsets.symmetric(horizontal: 22, vertical: 12),
-            decoration: BoxDecoration(
-              borderRadius: BorderRadius.circular(999),
-              gradient: const LinearGradient(
-                begin: Alignment.centerLeft,
-                end: Alignment.centerRight,
-                colors: <Color>[Color(0x38FFFFFF), Color(0x26FFFFFF)],
-              ),
-              border: Border.all(color: const Color(0x66FFFFFF)),
-            ),
-            child: Row(
-              mainAxisSize: MainAxisSize.min,
-              children: <Widget>[
-                const Icon(
-                  Icons.auto_awesome_rounded,
-                  color: Colors.white,
-                  size: 20,
-                ),
-                const SizedBox(width: 10),
-                Text(
-                  LearningUiText.detailReadMode,
-                  style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                    color: Colors.white,
-                    fontWeight: FontWeight.w700,
-                  ),
-                ),
-              ],
-            ),
-          ),
         ],
       ),
     );
@@ -504,13 +481,245 @@ class _WordDetailScreenState extends ConsumerState<WordDetailScreen> {
       return <String>['-'];
     }
 
-    final String normalized = particle.replaceAll(' ', '');
+    final Set<String> parsedParticles = particle
+        .split(',')
+        .map((String value) => value.trim())
+        .where((String value) => value.isNotEmpty)
+        .toSet();
 
-    if (normalized.contains('/')) {
-      return normalized.split('/').where((String p) => p.isNotEmpty).toList();
+    if (parsedParticles.isEmpty) {
+      return <String>['-'];
     }
 
-    return <String>[normalized];
+    return parsedParticles.toList();
+  }
+
+  ParticleInfoEntity? _resolveParticleInfo(
+    String particle,
+    Map<String, ParticleInfoEntity> particleInfoByForm,
+  ) {
+    final ParticleInfoEntity? exact = particleInfoByForm[particle];
+    if (exact != null) {
+      return exact;
+    }
+
+    final List<String> slashForms = particle
+        .split('/')
+        .map((String value) => value.trim())
+        .where((String value) => value.isNotEmpty)
+        .toList();
+
+    for (final String form in slashForms) {
+      final ParticleInfoEntity? found = particleInfoByForm[form];
+      if (found != null) {
+        return found;
+      }
+    }
+
+    return null;
+  }
+
+  Widget _buildParticlePill(
+    BuildContext context,
+    String particle,
+    ParticleInfoEntity? info,
+  ) {
+    final bool isTappable = particle != '-' && info != null;
+
+    return _Pill(
+      label: particle,
+      color: const Color(0xFF2563EB),
+      outlined: true,
+      onTap: isTappable ? () => _showParticleInfoBubble(context, info) : null,
+    );
+  }
+
+  void _showParticleInfoBubble(BuildContext context, ParticleInfoEntity info) {
+    showDialog<void>(
+      context: context,
+      barrierColor: Colors.black.withOpacity(0.45),
+      builder: (BuildContext context) {
+        return Dialog(
+          insetPadding: const EdgeInsets.symmetric(
+            horizontal: 20,
+            vertical: 24,
+          ),
+          elevation: 0,
+          backgroundColor: Colors.transparent,
+          child: ClipRRect(
+            borderRadius: BorderRadius.circular(24),
+            child: BackdropFilter(
+              filter: ImageFilter.blur(sigmaX: 10, sigmaY: 10),
+              child: DecoratedBox(
+                decoration: BoxDecoration(
+                  gradient: const LinearGradient(
+                    begin: Alignment.topLeft,
+                    end: Alignment.bottomRight,
+                    colors: <Color>[Color(0xFFFDFEFF), Color(0xFFF4F8FF)],
+                  ),
+                  borderRadius: BorderRadius.circular(24),
+                  border: Border.all(color: Colors.white.withOpacity(0.85)),
+                  boxShadow: <BoxShadow>[
+                    BoxShadow(
+                      blurRadius: 28,
+                      offset: const Offset(0, 14),
+                      color: Colors.black.withOpacity(0.2),
+                    ),
+                  ],
+                ),
+                child: ConstrainedBox(
+                  constraints: const BoxConstraints(maxHeight: 620),
+                  child: Column(
+                    mainAxisSize: MainAxisSize.max,
+                    children: <Widget>[
+                      Container(
+                        width: double.infinity,
+                        padding: const EdgeInsets.fromLTRB(16, 14, 10, 14),
+                        decoration: const BoxDecoration(
+                          gradient: LinearGradient(
+                            begin: Alignment.topLeft,
+                            end: Alignment.bottomRight,
+                            colors: <Color>[
+                              Color(0xFF0C4A8A),
+                              Color(0xFF315F9F),
+                              Color(0xFFC51F3A),
+                            ],
+                          ),
+                        ),
+                        child: Row(
+                          children: <Widget>[
+                            Expanded(
+                              child: Text(
+                                'Nom : ${info.name}',
+                                style: Theme.of(context).textTheme.titleLarge
+                                    ?.copyWith(
+                                      color: Colors.white,
+                                      fontWeight: FontWeight.w700,
+                                    ),
+                              ),
+                            ),
+                            IconButton(
+                              onPressed: () => Navigator.of(context).pop(),
+                              icon: const Icon(
+                                Icons.close_rounded,
+                                color: Colors.white,
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
+                      Expanded(
+                        child: SingleChildScrollView(
+                          padding: const EdgeInsets.fromLTRB(16, 14, 16, 14),
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: <Widget>[
+                              Container(
+                                width: double.infinity,
+                                padding: const EdgeInsets.all(12),
+                                decoration: BoxDecoration(
+                                  borderRadius: BorderRadius.circular(14),
+                                  color: _koreaBlue.withOpacity(0.08),
+                                  border: Border.all(
+                                    color: _koreaBlue.withOpacity(0.2),
+                                  ),
+                                ),
+                                child: Column(
+                                  crossAxisAlignment: CrossAxisAlignment.start,
+                                  children: <Widget>[
+                                    Text(
+                                      'Particule : ${_formsSummary(info)}',
+                                      style: Theme.of(context)
+                                          .textTheme
+                                          .titleMedium
+                                          ?.copyWith(
+                                            fontWeight: FontWeight.w700,
+                                            color: _koreaBlue,
+                                          ),
+                                    ),
+                                    const SizedBox(height: 8),
+                                    Text(
+                                      'Description : ${info.description}',
+                                      style: Theme.of(context)
+                                          .textTheme
+                                          .bodyMedium
+                                          ?.copyWith(height: 1.35),
+                                    ),
+                                  ],
+                                ),
+                              ),
+                              const SizedBox(height: 14),
+                              Text(
+                                'Formes',
+                                style: Theme.of(context).textTheme.titleSmall
+                                    ?.copyWith(fontWeight: FontWeight.w800),
+                              ),
+                              const SizedBox(height: 8),
+                              Wrap(
+                                spacing: 8,
+                                runSpacing: 8,
+                                children: info.forms.entries
+                                    .map(
+                                      (MapEntry<String, String> entry) =>
+                                          _ParticleFormChip(
+                                            label: _formLabel(entry.key),
+                                            value: entry.value,
+                                          ),
+                                    )
+                                    .toList(),
+                              ),
+                              const SizedBox(height: 16),
+                              Text(
+                                'Exemples',
+                                style: Theme.of(context).textTheme.titleSmall
+                                    ?.copyWith(fontWeight: FontWeight.w800),
+                              ),
+                              const SizedBox(height: 8),
+                              ...info.examples.map(
+                                (ParticleExampleEntity example) =>
+                                    _ParticleExampleCard(example: example),
+                              ),
+                            ],
+                          ),
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+              ),
+            ),
+          ),
+        );
+      },
+    );
+  }
+
+  String _formsSummary(ParticleInfoEntity info) {
+    final List<String> forms = info.forms.values.toSet().toList();
+    return forms.join(' / ');
+  }
+
+  String _formLabel(String key) {
+    switch (key) {
+      case 'consonant':
+        return 'Consonne';
+      case 'vowel':
+        return 'Voyelle';
+      case 'universal':
+        return 'Universelle';
+      case 'honorific':
+        return 'Honorifique';
+      case 'formal':
+        return 'Formel';
+      case 'spoken':
+        return 'Oral';
+      case 'casual':
+        return 'Familier';
+      case 'exception_l':
+        return 'Exception (final ㄹ)';
+      default:
+        return key;
+    }
   }
 
   String _politenessForSelectedTense(WordEntity word) {
@@ -684,45 +893,6 @@ class _WordDetailScreenState extends ConsumerState<WordDetailScreen> {
                   ),
                 ),
               ),
-              const SizedBox(height: 8),
-              SizedBox(
-                width: double.infinity,
-                child: DecoratedBox(
-                  decoration: BoxDecoration(
-                    borderRadius: BorderRadius.circular(999),
-                    gradient: const LinearGradient(
-                      begin: Alignment.centerLeft,
-                      end: Alignment.centerRight,
-                      colors: <Color>[
-                        Color(0xFFFFFFFF),
-                        Color(0xFFF6F9FF),
-                        Color(0xFFEFF4FF),
-                      ],
-                    ),
-                    border: Border.all(color: const Color(0x8098A2B3)),
-                  ),
-                  child: OutlinedButton.icon(
-                    style: OutlinedButton.styleFrom(
-                      padding: const EdgeInsets.symmetric(vertical: 14),
-                      side: BorderSide.none,
-                      backgroundColor: Colors.transparent,
-                      foregroundColor: const Color(0xFF2F5A8B),
-                      shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(999),
-                      ),
-                    ),
-                    onPressed: () {
-                      ScaffoldMessenger.of(context).showSnackBar(
-                        const SnackBar(
-                          content: Text(LearningUiText.detailAddFavoritesSoon),
-                        ),
-                      );
-                    },
-                    icon: const Icon(Icons.star_border_rounded),
-                    label: const Text(LearningUiText.detailAddFavorites),
-                  ),
-                ),
-              ),
             ],
           ),
         ),
@@ -753,15 +923,17 @@ class _Pill extends StatelessWidget {
     required this.label,
     required this.color,
     this.outlined = false,
+    this.onTap,
   });
 
   final String label;
   final Color color;
   final bool outlined;
+  final VoidCallback? onTap;
 
   @override
   Widget build(BuildContext context) {
-    return Container(
+    final Widget child = Container(
       padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 8),
       decoration: BoxDecoration(
         color: outlined ? Colors.transparent : color.withOpacity(0.12),
@@ -774,6 +946,95 @@ class _Pill extends StatelessWidget {
           color: color,
           fontWeight: FontWeight.w700,
         ),
+      ),
+    );
+
+    if (onTap == null) {
+      return child;
+    }
+
+    return Material(
+      color: Colors.transparent,
+      child: InkWell(
+        borderRadius: BorderRadius.circular(14),
+        onTap: onTap,
+        child: child,
+      ),
+    );
+  }
+}
+
+class _ParticleFormChip extends StatelessWidget {
+  const _ParticleFormChip({required this.label, required this.value});
+
+  final String label;
+  final String value;
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 8),
+      decoration: BoxDecoration(
+        borderRadius: BorderRadius.circular(12),
+        color: const Color(0xFFF1F6FF),
+        border: Border.all(color: const Color(0xFFCFDFF7)),
+      ),
+      child: RichText(
+        text: TextSpan(
+          style: Theme.of(
+            context,
+          ).textTheme.bodyMedium?.copyWith(color: const Color(0xFF1E3A5F)),
+          children: <InlineSpan>[
+            TextSpan(
+              text: '$label : ',
+              style: const TextStyle(fontWeight: FontWeight.w700),
+            ),
+            TextSpan(text: value),
+          ],
+        ),
+      ),
+    );
+  }
+}
+
+class _ParticleExampleCard extends StatelessWidget {
+  const _ParticleExampleCard({required this.example});
+
+  final ParticleExampleEntity example;
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      width: double.infinity,
+      margin: const EdgeInsets.only(bottom: 8),
+      padding: const EdgeInsets.all(12),
+      decoration: BoxDecoration(
+        borderRadius: BorderRadius.circular(14),
+        gradient: const LinearGradient(
+          begin: Alignment.topLeft,
+          end: Alignment.bottomRight,
+          colors: <Color>[Color(0xFFFFFFFF), Color(0xFFF6F9FF)],
+        ),
+        border: Border.all(color: const Color(0xFFDDE6F5)),
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: <Widget>[
+          Text(
+            example.korean,
+            style: Theme.of(context).textTheme.bodyLarge?.copyWith(
+              fontWeight: FontWeight.w700,
+              color: const Color(0xFF0F2745),
+            ),
+          ),
+          const SizedBox(height: 4),
+          Text(
+            example.translation,
+            style: Theme.of(
+              context,
+            ).textTheme.bodyMedium?.copyWith(color: Colors.blueGrey.shade800),
+          ),
+        ],
       ),
     );
   }

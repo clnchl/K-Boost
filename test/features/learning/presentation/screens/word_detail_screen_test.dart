@@ -97,6 +97,46 @@ void main() {
       expect(find.text('Je mange du riz.'), findsOneWidget);
     });
 
+    testWidgets('opens particle info bubble on particle tap', (
+      WidgetTester tester,
+    ) async {
+      final GetWordExamplesUseCase useCase = GetWordExamplesUseCase(
+        FakeExampleSentenceRepository(),
+      );
+      final GetWordByIdUseCase wordByIdUseCase = GetWordByIdUseCase(
+        FakeWordRepository(
+          initialWords: <WordEntity>[sampleWord(id: 'w1', particle: '은/는')],
+        ),
+      );
+
+      await tester.pumpWidget(
+        buildTestApp(
+          examplesUseCase: useCase,
+          wordByIdUseCase: wordByIdUseCase,
+        ),
+      );
+      await tester.pump();
+      await tester.pump();
+
+      expect(find.text('은/는'), findsOneWidget);
+      expect(find.text('은'), findsNothing);
+      expect(find.text('는'), findsNothing);
+
+      final Finder particleChip = find.text('은/는').first;
+      await tester.ensureVisible(particleChip);
+      await tester.tap(particleChip, warnIfMissed: false);
+      await tester.pumpAndSettle();
+
+      expect(find.textContaining('Nom : Theme'), findsOneWidget);
+      expect(find.textContaining('Particule : 은 / 는'), findsOneWidget);
+      expect(
+        find.textContaining('Description : Indique le theme'),
+        findsOneWidget,
+      );
+      expect(find.text('저는 한국어를 배워요.'), findsOneWidget);
+      expect(find.text('Moi, j\'apprends le coreen.'), findsOneWidget);
+    });
+
     testWidgets(
       'switches between informelle, poli, formelle and keeps tense context',
       (WidgetTester tester) async {
