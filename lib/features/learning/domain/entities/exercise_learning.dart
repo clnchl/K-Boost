@@ -99,22 +99,8 @@ List<String> learningStageBreakdownParts(List<ExerciseEntity> exercises) {
     return <String>['0 exercice'];
   }
 
-  final Map<LearningStage, int> counts = <LearningStage, int>{};
-  for (final ExerciseEntity exercise in exercises) {
-    final LearningStage stage = learningStageForType(exercise.type);
-    counts[stage] = (counts[stage] ?? 0) + 1;
-  }
-
-  final List<String> parts = <String>[];
-  for (final LearningStage stage in learningStageProgression) {
-    final int count = counts[stage] ?? 0;
-    if (count == 0) {
-      continue;
-    }
-    parts.add('$count ${learningStageDisplayLabel(stage)}');
-  }
-
-  return parts;
+  final int count = exercises.length;
+  return <String>[count == 1 ? '1 exercice' : '$count exercices'];
 }
 
 String learningLevelLabel(List<ExerciseEntity> exercises) {
