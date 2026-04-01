@@ -4,6 +4,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../domain/entities/exercise.dart';
 import '../viewmodels/exercise_score_viewmodel.dart';
 import '../viewmodels/theme_progress_viewmodel.dart';
+import '../widgets/theme_ui_helpers.dart';
 
 class ThemeExerciseSessionScreen extends ConsumerStatefulWidget {
   const ThemeExerciseSessionScreen({
@@ -210,6 +211,8 @@ class _ThemeExerciseSessionScreenState
               child: LinearProgressIndicator(value: progress, minHeight: 12),
             ),
             const SizedBox(height: 24),
+            exerciseMetaChips(_currentExercise.type),
+            const SizedBox(height: 10),
             Text(_currentExercise.questionText, style: textTheme.headlineSmall),
             const SizedBox(height: 16),
             Expanded(

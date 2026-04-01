@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 
 import '../../domain/entities/exercise.dart';
+import '../../domain/entities/exercise_learning.dart';
 import '../../domain/entities/theme.dart';
 import 'theme_ui_helpers.dart';
 
@@ -40,6 +41,7 @@ class ThemePreviewSheet extends StatelessWidget {
     final int progressPercent = (progressValue * 100).round();
     final int rewardPoints = exercises.isEmpty ? 0 : exercises.length * 25;
     final int rewardXp = exercises.isEmpty ? 0 : 2 + (exercises.length * 2);
+    final LearningSummary summary = summarizeExercisesForLearning(exercises);
 
     return SafeArea(
       top: false,
@@ -68,59 +70,102 @@ class ThemePreviewSheet extends StatelessWidget {
                     ),
                   ),
                 ),
-                const SizedBox(height: 14),
-                _ThemePreviewHeader(
-                  theme: theme,
-                  accentColor: accentColor,
-                  onClose: () => Navigator.of(context).pop(false),
-                ),
-                const SizedBox(height: 18),
-                Row(
-                  children: <Widget>[
-                    Text('Progression', style: textTheme.titleLarge),
-                    const Spacer(),
-                    Text(
-                      '$progressPercent%',
-                      style: textTheme.titleLarge?.copyWith(color: accentColor),
-                    ),
-                  ],
-                ),
-                const SizedBox(height: 10),
-                ClipRRect(
-                  borderRadius: BorderRadius.circular(999),
-                  child: LinearProgressIndicator(
-                    minHeight: 14,
-                    value: progressValue,
-                    backgroundColor: accentColor.withOpacity(0.16),
-                    valueColor: AlwaysStoppedAnimation<Color>(accentColor),
-                  ),
-                ),
-                const SizedBox(height: 18),
-                _sectionTitle(
-                  context: context,
-                  icon: Icons.workspace_premium_outlined,
-                  title: 'Récompenses',
-                  accentColor: accentColor,
-                ),
-                const SizedBox(height: 12),
-                _ThemePreviewRewards(
-                  accentColor: accentColor,
-                  points: rewardPoints,
-                  xp: rewardXp,
-                ),
-                const SizedBox(height: 18),
-                _sectionTitle(
-                  context: context,
-                  icon: Icons.menu_book_outlined,
-                  title: 'Exercices inclus',
-                  accentColor: accentColor,
-                ),
-                const SizedBox(height: 10),
                 Expanded(
                   child: SingleChildScrollView(
-                    child: _ThemePreviewExerciseList(
-                      exercises: exercises,
-                      accentColor: accentColor,
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.stretch,
+                      children: <Widget>[
+                        const SizedBox(height: 14),
+                        _ThemePreviewHeader(
+                          theme: theme,
+                          accentColor: accentColor,
+                          onClose: () => Navigator.of(context).pop(false),
+                        ),
+                        const SizedBox(height: 18),
+                        Row(
+                          children: <Widget>[
+                            Text('Progression', style: textTheme.titleLarge),
+                            const Spacer(),
+                            Text(
+                              '$progressPercent%',
+                              style: textTheme.titleLarge?.copyWith(
+                                color: accentColor,
+                              ),
+                            ),
+                          ],
+                        ),
+                        const SizedBox(height: 10),
+                        ClipRRect(
+                          borderRadius: BorderRadius.circular(999),
+                          child: LinearProgressIndicator(
+                            minHeight: 14,
+                            value: progressValue,
+                            backgroundColor: accentColor.withOpacity(0.16),
+                            valueColor: AlwaysStoppedAnimation<Color>(
+                              accentColor,
+                            ),
+                          ),
+                        ),
+                        const SizedBox(height: 10),
+                        Wrap(
+                          spacing: 8,
+                          runSpacing: 8,
+                          children: <Widget>[
+                            _PreviewBadge(
+                              text: summary.stageLabel,
+                              accentColor: accentColor,
+                            ),
+                            _PreviewBadge(
+                              text: summary.levelLabel,
+                              accentColor: accentColor,
+                            ),
+                            ...summary.stageBreakdownParts.map(
+                              (String part) => _PreviewBadge(
+                                text: part,
+                                accentColor: accentColor,
+                              ),
+                            ),
+                          ],
+                        ),
+                        const SizedBox(height: 14),
+                        _sectionTitle(
+                          context: context,
+                          icon: Icons.psychology_alt_outlined,
+                          title: 'Parcours pédagogique',
+                          accentColor: accentColor,
+                        ),
+                        const SizedBox(height: 10),
+                        Wrap(
+                          spacing: 8,
+                          runSpacing: 8,
+                          children: _learningPathBadges(accentColor),
+                        ),
+                        const SizedBox(height: 18),
+                        _sectionTitle(
+                          context: context,
+                          icon: Icons.workspace_premium_outlined,
+                          title: 'Récompenses',
+                          accentColor: accentColor,
+                        ),
+                        const SizedBox(height: 12),
+                        _ThemePreviewRewards(
+                          accentColor: accentColor,
+                          points: rewardPoints,
+                          xp: rewardXp,
+                        ),
+                        const SizedBox(height: 18),
+                        _sectionTitle(
+                          context: context,
+                          icon: Icons.menu_book_outlined,
+                          title: 'Exercices inclus',
+                          accentColor: accentColor,
+                        ),
+                        const SizedBox(height: 10),
+                        _ThemePreviewExerciseList(
+                          exercises: exercises,
+                          accentColor: accentColor,
+                        ),
+                      ],
                     ),
                   ),
                 ),
@@ -140,6 +185,81 @@ class ThemePreviewSheet extends StatelessWidget {
               ],
             ),
           ),
+        ),
+      ),
+    );
+  }
+
+  List<Widget> _learningPathBadges(Color accentColor) {
+    final Set<LearningStage> includedStages = exercises
+        .map((ExerciseEntity e) => learningStageForType(e.type))
+        .toSet();
+
+    return List<Widget>.generate(learningStageProgression.length, (int index) {
+      final LearningStage stage = learningStageProgression[index];
+      final bool included = includedStages.contains(stage);
+      final String label = '${index + 1} ${learningStageDisplayLabel(stage)}';
+
+      return _PathBadge(
+        text: included ? label : '$label (à venir)',
+        included: included,
+        accentColor: accentColor,
+      );
+    });
+  }
+}
+
+class _PreviewBadge extends StatelessWidget {
+  const _PreviewBadge({required this.text, required this.accentColor});
+
+  final String text;
+  final Color accentColor;
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
+      decoration: BoxDecoration(
+        color: accentColor.withOpacity(0.14),
+        borderRadius: BorderRadius.circular(999),
+        border: Border.all(color: accentColor.withOpacity(0.25)),
+      ),
+      child: Text(
+        text,
+        style: Theme.of(
+          context,
+        ).textTheme.bodySmall?.copyWith(color: accentColor),
+      ),
+    );
+  }
+}
+
+class _PathBadge extends StatelessWidget {
+  const _PathBadge({
+    required this.text,
+    required this.included,
+    required this.accentColor,
+  });
+
+  final String text;
+  final bool included;
+  final Color accentColor;
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 7),
+      decoration: BoxDecoration(
+        color: included
+            ? accentColor.withOpacity(0.75)
+            : Colors.grey.withOpacity(0.22),
+        borderRadius: BorderRadius.circular(999),
+      ),
+      child: Text(
+        text,
+        style: Theme.of(context).textTheme.bodySmall?.copyWith(
+          color: included ? Colors.white : Colors.black87,
+          fontWeight: FontWeight.w600,
         ),
       ),
     );
@@ -291,6 +411,8 @@ class _ThemePreviewExerciseList extends StatelessWidget {
   }
 
   Widget _exerciseItem(BuildContext context, ExerciseEntity exercise) {
+    final textTheme = Theme.of(context).textTheme;
+
     return Container(
       width: double.infinity,
       margin: const EdgeInsets.only(bottom: 10),
@@ -305,9 +427,19 @@ class _ThemePreviewExerciseList extends StatelessWidget {
           Icon(Icons.circle, size: 10, color: accentColor),
           const SizedBox(width: 10),
           Expanded(
-            child: Text(
-              exerciseTypeLabel(exercise.type),
-              style: Theme.of(context).textTheme.titleMedium,
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: <Widget>[
+                Text(
+                  exerciseTypeLabel(exercise.type),
+                  style: textTheme.titleMedium,
+                ),
+                const SizedBox(height: 2),
+                Text(
+                  exerciseStageLabel(exercise.type),
+                  style: textTheme.bodySmall,
+                ),
+              ],
             ),
           ),
         ],

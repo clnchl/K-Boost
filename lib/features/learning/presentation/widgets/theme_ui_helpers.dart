@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 
+import '../../domain/entities/exercise_learning.dart';
+
 Color parseThemeColor(String? hexColor) {
   if (hexColor == null) {
     return Colors.purple;
@@ -22,8 +24,28 @@ IconData themeIconData(String icon) => switch (icon.toLowerCase()) {
 };
 
 String exerciseTypeLabel(String type) => switch (type) {
-  'multiple_choice' => 'QCM',
-  'translation' => 'Traduction',
-  'sentence_order' => 'Ordre des phrases',
+  ExerciseType.multipleChoice => 'QCM',
+  ExerciseType.audioChoice => 'Choix audio',
+  ExerciseType.memory => 'Memory',
+  ExerciseType.translation => 'Traduction',
+  ExerciseType.sentenceOrder => 'Ordre des phrases',
+  ExerciseType.fillBlank => 'Texte à trous',
+  ExerciseType.writing => 'Écriture',
+  ExerciseType.dictation => 'Dictée',
+  ExerciseType.grammar => 'Grammaire',
   _ => 'Exercice',
 };
+
+String exerciseStageLabel(String type) => learningStageLabel(type);
+
+Widget exerciseMetaChips(String type) {
+  return Wrap(
+    spacing: 8,
+    runSpacing: 8,
+    children: <Widget>[
+      Chip(label: Text(exerciseTypeLabel(type))),
+      Chip(label: Text(exerciseStageLabel(type))),
+      Chip(label: Text('Niveau ${recommendedLevelForType(type)}')),
+    ],
+  );
+}

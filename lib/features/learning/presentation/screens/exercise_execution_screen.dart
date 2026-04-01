@@ -4,6 +4,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../domain/entities/exercise.dart';
 import '../viewmodels/exercise_score_viewmodel.dart';
 import '../viewmodels/theme_progress_viewmodel.dart';
+import '../widgets/theme_ui_helpers.dart';
 
 class ExerciseExecutionScreen extends ConsumerStatefulWidget {
   const ExerciseExecutionScreen({super.key, required this.exercise});
@@ -176,7 +177,7 @@ class _ExerciseExecutionScreenState
             ),
           ),
           const SizedBox(height: 12),
-          Text(exercise.type, style: textTheme.titleSmall),
+          exerciseMetaChips(exercise.type),
           const SizedBox(height: 8),
           Text(exercise.questionText, style: textTheme.headlineSmall),
           const SizedBox(height: 16),

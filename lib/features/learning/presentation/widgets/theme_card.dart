@@ -8,12 +8,18 @@ class ThemeCard extends StatelessWidget {
     super.key,
     required this.theme,
     required this.onTap,
+    required this.stageLabel,
+    required this.levelLabel,
+    required this.stageBreakdownParts,
     this.progress = 0,
     this.isCompleted = false,
   });
 
   final ThemeEntity theme;
   final VoidCallback onTap;
+  final String stageLabel;
+  final String levelLabel;
+  final List<String> stageBreakdownParts;
   final double progress;
   final bool isCompleted;
 
@@ -33,6 +39,15 @@ class ThemeCard extends StatelessWidget {
         ? bgColor.withOpacity(0.16)
         : Colors.white.withOpacity(0.35);
     final String actionLabel = isCompleted ? 'S\'entraîner' : 'Continuer';
+    final Color breakdownBg = isCompleted
+        ? bgColor.withOpacity(0.55)
+        : Colors.white.withOpacity(0.2);
+
+    Widget infoBadge(String text) => _InfoBadge(
+      text: text,
+      textColor: titleColor,
+      backgroundColor: iconBgColor,
+    );
 
     return Card(
       elevation: 2,
@@ -104,6 +119,29 @@ class ThemeCard extends StatelessWidget {
                   ],
                 ),
                 const SizedBox(height: 12),
+                Wrap(
+                  spacing: 8,
+                  runSpacing: 8,
+                  children: <Widget>[
+                    infoBadge(stageLabel),
+                    infoBadge(levelLabel),
+                  ],
+                ),
+                const SizedBox(height: 8),
+                Wrap(
+                  spacing: 6,
+                  runSpacing: 6,
+                  children: stageBreakdownParts
+                      .map(
+                        (String part) => _InfoBadge(
+                          text: part,
+                          textColor: Colors.white,
+                          backgroundColor: breakdownBg,
+                        ),
+                      )
+                      .toList(),
+                ),
+                const SizedBox(height: 12),
                 ClipRRect(
                   borderRadius: BorderRadius.circular(999),
                   child: LinearProgressIndicator(
@@ -141,6 +179,36 @@ class ThemeCard extends StatelessWidget {
               ],
             ),
           ),
+        ),
+      ),
+    );
+  }
+}
+
+class _InfoBadge extends StatelessWidget {
+  const _InfoBadge({
+    required this.text,
+    required this.textColor,
+    required this.backgroundColor,
+  });
+
+  final String text;
+  final Color textColor;
+  final Color backgroundColor;
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
+      decoration: BoxDecoration(
+        color: backgroundColor,
+        borderRadius: BorderRadius.circular(999),
+      ),
+      child: Text(
+        text,
+        style: Theme.of(context).textTheme.bodySmall?.copyWith(
+          color: textColor,
+          fontWeight: FontWeight.w600,
         ),
       ),
     );

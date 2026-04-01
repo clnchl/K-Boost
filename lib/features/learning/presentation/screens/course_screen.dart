@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../domain/entities/exercise.dart';
+import '../../domain/entities/exercise_learning.dart';
 import '../../domain/entities/theme.dart';
 import '../viewmodels/course_viewmodel.dart';
 import '../viewmodels/theme_viewmodel.dart';
@@ -60,12 +61,15 @@ class CourseScreen extends ConsumerWidget {
     List<ExerciseEntity> allExercises,
     double progress,
   ) async {
-    final List<ExerciseEntity> themeExercises = allExercises
+    final List<ExerciseEntity> rawThemeExercises = allExercises
         .where(
           (ExerciseEntity exercise) => theme.exerciseIds.contains(exercise.id),
         )
-        .take(2)
         .toList();
+
+    final List<ExerciseEntity> themeExercises = orderExercisesForLearning(
+      rawThemeExercises,
+    ).take(2).toList();
 
     final bool? shouldOpen = await showModalBottomSheet<bool>(
       context: context,
@@ -160,11 +164,21 @@ class CourseScreen extends ConsumerWidget {
       separatorBuilder: (_, __) => const SizedBox(height: 12),
       itemBuilder: (BuildContext context, int index) {
         final ThemeEntity theme = themes[index];
+        final List<ExerciseEntity> themeExercises = allExercises
+            .where((ExerciseEntity e) => theme.exerciseIds.contains(e.id))
+            .toList();
+        final LearningSummary summary = summarizeExercisesForLearning(
+          themeExercises,
+        );
+
         final double progress = _themeProgress(theme, completedExerciseIds);
         final bool isCompleted = progress == 1 && theme.exerciseIds.isNotEmpty;
 
         return ThemeCard(
           theme: theme,
+          stageLabel: summary.stageLabel,
+          levelLabel: summary.levelLabel,
+          stageBreakdownParts: summary.stageBreakdownParts,
           progress: progress,
           isCompleted: isCompleted,
           onTap: () =>
