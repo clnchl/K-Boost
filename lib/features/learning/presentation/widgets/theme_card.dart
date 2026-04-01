@@ -13,6 +13,7 @@ class ThemeCard extends StatelessWidget {
     required this.stageBreakdownParts,
     this.progress = 0,
     this.isCompleted = false,
+    this.isLocked = false,
   });
 
   final ThemeEntity theme;
@@ -22,6 +23,7 @@ class ThemeCard extends StatelessWidget {
   final List<String> stageBreakdownParts;
   final double progress;
   final bool isCompleted;
+  final bool isLocked;
 
   @override
   Widget build(BuildContext context) {
@@ -38,7 +40,9 @@ class ThemeCard extends StatelessWidget {
     final Color progressBg = isCompleted
         ? bgColor.withOpacity(0.16)
         : Colors.white.withOpacity(0.35);
-    final String actionLabel = isCompleted ? 'S\'entraîner' : 'Continuer';
+    final String actionLabel = isLocked
+        ? 'Bientôt disponible'
+        : (isCompleted ? 'S\'entraîner' : 'Continuer');
     final Color breakdownBg = isCompleted
         ? bgColor.withOpacity(0.55)
         : Colors.white.withOpacity(0.2);
@@ -52,7 +56,7 @@ class ThemeCard extends StatelessWidget {
     return Card(
       elevation: 2,
       child: InkWell(
-        onTap: onTap,
+        onTap: isLocked ? null : onTap,
         borderRadius: BorderRadius.circular(12),
         child: Container(
           decoration: BoxDecoration(
@@ -111,7 +115,7 @@ class ThemeCard extends StatelessWidget {
                         ],
                       ),
                     ),
-                    if (!isCompleted)
+                    if (!isCompleted && !isLocked)
                       Icon(
                         Icons.arrow_forward_rounded,
                         color: Colors.white.withOpacity(0.7),
@@ -125,6 +129,12 @@ class ThemeCard extends StatelessWidget {
                   children: <Widget>[
                     infoBadge(stageLabel),
                     infoBadge(levelLabel),
+                    if (isLocked)
+                      _InfoBadge(
+                        text: 'Bientôt disponible',
+                        textColor: titleColor,
+                        backgroundColor: iconBgColor,
+                      ),
                   ],
                 ),
                 const SizedBox(height: 8),
@@ -160,7 +170,7 @@ class ThemeCard extends StatelessWidget {
                 SizedBox(
                   width: double.infinity,
                   child: FilledButton(
-                    onPressed: onTap,
+                    onPressed: isLocked ? null : onTap,
                     style: FilledButton.styleFrom(
                       backgroundColor: isCompleted
                           ? Colors.green.withOpacity(0.2)

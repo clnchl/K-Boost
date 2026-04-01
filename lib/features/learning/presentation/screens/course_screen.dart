@@ -62,16 +62,6 @@ class CourseScreen extends ConsumerWidget {
     List<ExerciseEntity> allExercises,
     double progress,
   ) async {
-    // Si c'est le thème Hangul, naviguer vers l'écran de sélection Hangul
-    if (theme.id == 't1') {
-      Navigator.of(context).push(
-        MaterialPageRoute<void>(
-          builder: (_) => const HangulCategorySelectionScreen(),
-        ),
-      );
-      return;
-    }
-
     final List<ExerciseEntity> rawThemeExercises = allExercises
         .where(
           (ExerciseEntity exercise) => theme.exerciseIds.contains(exercise.id),
@@ -80,7 +70,7 @@ class CourseScreen extends ConsumerWidget {
 
     final List<ExerciseEntity> themeExercises = orderExercisesForLearning(
       rawThemeExercises,
-    ).take(2).toList();
+    );
 
     final bool? shouldOpen = await showModalBottomSheet<bool>(
       context: context,
@@ -94,6 +84,15 @@ class CourseScreen extends ConsumerWidget {
     );
 
     if (shouldOpen == true && context.mounted) {
+      if (theme.id == 't1') {
+        Navigator.of(context).push(
+          MaterialPageRoute<void>(
+            builder: (_) => const HangulCategorySelectionScreen(),
+          ),
+        );
+        return;
+      }
+
       Navigator.of(context).push(
         MaterialPageRoute<void>(
           builder: (_) => ThemeExerciseSessionScreen(
@@ -184,6 +183,7 @@ class CourseScreen extends ConsumerWidget {
 
         final double progress = _themeProgress(theme, completedExerciseIds);
         final bool isCompleted = progress == 1 && theme.exerciseIds.isNotEmpty;
+        final bool isLocked = theme.exerciseIds.isEmpty;
 
         return ThemeCard(
           theme: theme,
@@ -192,6 +192,7 @@ class CourseScreen extends ConsumerWidget {
           stageBreakdownParts: summary.stageBreakdownParts,
           progress: progress,
           isCompleted: isCompleted,
+          isLocked: isLocked,
           onTap: () =>
               _showThemePreviewAndOpen(context, theme, allExercises, progress),
         );
