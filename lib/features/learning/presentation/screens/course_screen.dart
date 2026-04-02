@@ -11,6 +11,7 @@ import '../widgets/exercise_card.dart';
 import '../widgets/theme_card.dart';
 import '../widgets/theme_preview_sheet.dart';
 import 'exercise_execution_screen.dart';
+import 'hangul_course_list_screen.dart';
 import 'hangul_category_selection_screen.dart';
 import 'theme_exercise_session_screen.dart';
 
@@ -87,7 +88,7 @@ class CourseScreen extends ConsumerWidget {
       if (theme.id == 't1') {
         Navigator.of(context).push(
           MaterialPageRoute<void>(
-            builder: (_) => const HangulCategorySelectionScreen(),
+            builder: (_) => const HangulCourseListScreen(),
           ),
         );
         return;

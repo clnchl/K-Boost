@@ -4,9 +4,19 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../data/models/hangul_letter.dart';
 
+enum HangulCourseFocus {
+  structure,
+  vowels,
+  consonants,
+  vowelsAdvanced,
+  consonantsAdvanced,
+  mixed,
+}
+
 // État de la session d'apprentissage Hangul
 class HangulSessionState {
   const HangulSessionState({
+    required this.courseFocus,
     required this.selectedConsonants,
     required this.selectedVowels,
     required this.generatedSyllables,
@@ -19,6 +29,7 @@ class HangulSessionState {
     required this.allLearned,
   });
 
+  final HangulCourseFocus courseFocus;
   final List<HangulLetter> selectedConsonants;
   final List<HangulLetter> selectedVowels;
   final List<HangulSyllable> generatedSyllables;
@@ -38,6 +49,7 @@ class HangulSessionState {
   int get targetLessonExercises => trainingMode ? trainingQuestionCount : 5;
 
   HangulSessionState copyWith({
+    HangulCourseFocus? courseFocus,
     List<HangulLetter>? selectedConsonants,
     List<HangulLetter>? selectedVowels,
     List<HangulSyllable>? generatedSyllables,
@@ -50,6 +62,7 @@ class HangulSessionState {
     Set<String>? allLearned,
   }) {
     return HangulSessionState(
+      courseFocus: courseFocus ?? this.courseFocus,
       selectedConsonants: selectedConsonants ?? this.selectedConsonants,
       selectedVowels: selectedVowels ?? this.selectedVowels,
       generatedSyllables: generatedSyllables ?? this.generatedSyllables,
@@ -78,6 +91,7 @@ class HangulViewModel extends StateNotifier<HangulSessionState> {
   HangulViewModel()
     : super(
         const HangulSessionState(
+          courseFocus: HangulCourseFocus.structure,
           selectedConsonants: <HangulLetter>[],
           selectedVowels: <HangulLetter>[],
           generatedSyllables: <HangulSyllable>[],
@@ -137,27 +151,74 @@ class HangulViewModel extends StateNotifier<HangulSessionState> {
     required int letterCount,
     required bool trainingMode,
     required List<HangulExerciseType> selectedExerciseTypes,
+    required HangulCourseFocus courseFocus,
   }) {
     final List<HangulLetter> allConsonants = _allConsonants();
     final List<HangulLetter> allVowels = _allVowels();
     final int totalAlphabetCount = allConsonants.length + allVowels.length;
+    final HangulLetter silentConsonant = allConsonants.firstWhere(
+      (HangulLetter letter) => letter.character == 'ㅇ',
+      orElse: () => allConsonants.first,
+    );
+    final HangulLetter baseVowel = allVowels.first;
 
     late final List<HangulLetter> selectedConsonants;
     late final List<HangulLetter> selectedVowels;
 
-    if (letterCount >= totalAlphabetCount) {
-      selectedConsonants = allConsonants;
-      selectedVowels = allVowels;
-    } else {
-      final int evenCount = letterCount.isOdd ? letterCount - 1 : letterCount;
-      final int clampedCount = evenCount < 4 ? 4 : evenCount;
-      final int maxPairCount = min(allConsonants.length, allVowels.length);
-      final int pairCount = min(max(clampedCount ~/ 2, 2), maxPairCount);
+    switch (courseFocus) {
+      case HangulCourseFocus.vowels:
+        selectedConsonants = <HangulLetter>[silentConsonant];
+        selectedVowels = letterCount >= allVowels.length
+            ? allVowels
+            : allVowels.take(max(letterCount, 4)).toList(growable: false);
+        break;
+      case HangulCourseFocus.vowelsAdvanced:
+        final List<HangulLetter> advancedVowels = allVowels
+            .where((HangulLetter letter) => letter.category == 'vowel_advanced')
+            .toList(growable: false);
+        selectedConsonants = <HangulLetter>[silentConsonant];
+        selectedVowels = letterCount >= advancedVowels.length
+            ? advancedVowels
+            : advancedVowels.take(max(letterCount, 4)).toList(growable: false);
+        break;
+      case HangulCourseFocus.consonants:
+        selectedConsonants = letterCount >= allConsonants.length
+            ? allConsonants
+            : allConsonants.take(max(letterCount, 4)).toList(growable: false);
+        selectedVowels = <HangulLetter>[baseVowel];
+        break;
+      case HangulCourseFocus.consonantsAdvanced:
+        final List<HangulLetter> advancedConsonants = allConsonants
+            .where(
+              (HangulLetter letter) => letter.category == 'consonant_advanced',
+            )
+            .toList(growable: false);
+        selectedConsonants = letterCount >= advancedConsonants.length
+            ? advancedConsonants
+            : advancedConsonants
+                  .take(max(letterCount, 4))
+                  .toList(growable: false);
+        selectedVowels = <HangulLetter>[baseVowel];
+        break;
+      case HangulCourseFocus.structure:
+      case HangulCourseFocus.mixed:
+        if (letterCount >= totalAlphabetCount) {
+          selectedConsonants = allConsonants;
+          selectedVowels = allVowels;
+        } else {
+          final int evenCount = letterCount.isOdd
+              ? letterCount - 1
+              : letterCount;
+          final int clampedCount = evenCount < 4 ? 4 : evenCount;
+          final int maxPairCount = min(allConsonants.length, allVowels.length);
+          final int pairCount = min(max(clampedCount ~/ 2, 2), maxPairCount);
 
-      selectedConsonants = allConsonants
-          .take(pairCount)
-          .toList(growable: false);
-      selectedVowels = allVowels.take(pairCount).toList(growable: false);
+          selectedConsonants = allConsonants
+              .take(pairCount)
+              .toList(growable: false);
+          selectedVowels = allVowels.take(pairCount).toList(growable: false);
+        }
+        break;
     }
 
     final List<HangulSyllable> syllables = _buildSyllables(
@@ -166,6 +227,7 @@ class HangulViewModel extends StateNotifier<HangulSessionState> {
     );
 
     state = state.copyWith(
+      courseFocus: courseFocus,
       selectedConsonants: selectedConsonants,
       selectedVowels: selectedVowels,
       generatedSyllables: syllables,
@@ -220,6 +282,7 @@ class HangulViewModel extends StateNotifier<HangulSessionState> {
 
   void resetSession() {
     state = const HangulSessionState(
+      courseFocus: HangulCourseFocus.structure,
       selectedConsonants: <HangulLetter>[],
       selectedVowels: <HangulLetter>[],
       generatedSyllables: <HangulSyllable>[],

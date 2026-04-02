@@ -26,6 +26,7 @@ class _HangulCategorySelectionScreenState
           letterCount: _selectedCount,
           trainingMode: _trainingMode,
           selectedExerciseTypes: _selectedExerciseTypes.toList(),
+          courseFocus: HangulCourseFocus.structure,
         );
 
     Navigator.of(context).push(

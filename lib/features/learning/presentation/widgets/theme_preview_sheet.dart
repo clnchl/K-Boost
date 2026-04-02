@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 
 import '../../domain/entities/exercise.dart';
-import '../../domain/entities/exercise_learning.dart';
 import '../../domain/entities/theme.dart';
 import 'theme_ui_helpers.dart';
 
@@ -41,8 +40,6 @@ class ThemePreviewSheet extends StatelessWidget {
     final int progressPercent = (progressValue * 100).round();
     final int rewardPoints = exercises.isEmpty ? 0 : exercises.length * 25;
     final int rewardXp = exercises.isEmpty ? 0 : 2 + (exercises.length * 2);
-    final LearningSummary summary = summarizeExercisesForLearning(exercises);
-
     return SafeArea(
       top: false,
       child: Padding(
@@ -106,27 +103,6 @@ class ThemePreviewSheet extends StatelessWidget {
                             ),
                           ),
                         ),
-                        const SizedBox(height: 10),
-                        Wrap(
-                          spacing: 8,
-                          runSpacing: 8,
-                          children: <Widget>[
-                            _PreviewBadge(
-                              text: summary.stageLabel,
-                              accentColor: accentColor,
-                            ),
-                            _PreviewBadge(
-                              text: summary.levelLabel,
-                              accentColor: accentColor,
-                            ),
-                            ...summary.stageBreakdownParts.map(
-                              (String part) => _PreviewBadge(
-                                text: part,
-                                accentColor: accentColor,
-                              ),
-                            ),
-                          ],
-                        ),
                         const SizedBox(height: 14),
                         const SizedBox(height: 4),
                         _sectionTitle(
@@ -175,31 +151,6 @@ class ThemePreviewSheet extends StatelessWidget {
             ),
           ),
         ),
-      ),
-    );
-  }
-}
-
-class _PreviewBadge extends StatelessWidget {
-  const _PreviewBadge({required this.text, required this.accentColor});
-
-  final String text;
-  final Color accentColor;
-
-  @override
-  Widget build(BuildContext context) {
-    return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
-      decoration: BoxDecoration(
-        color: accentColor.withOpacity(0.14),
-        borderRadius: BorderRadius.circular(999),
-        border: Border.all(color: accentColor.withOpacity(0.25)),
-      ),
-      child: Text(
-        text,
-        style: Theme.of(
-          context,
-        ).textTheme.bodySmall?.copyWith(color: accentColor),
       ),
     );
   }
