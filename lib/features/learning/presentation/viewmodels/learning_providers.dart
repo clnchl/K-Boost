@@ -1,10 +1,12 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../data/datasources/learning_local_datasource.dart';
+import '../../data/datasources/mock_particles.dart';
 import '../../data/repositories_impl/exercise_repository_impl.dart';
 import '../../data/repositories_impl/example_sentence_repository_impl.dart';
 import '../../data/repositories_impl/note_repository_impl.dart';
 import '../../data/repositories_impl/word_repository_impl.dart';
+import '../../domain/entities/particle_info.dart';
 import '../../domain/repositories/exercise_repository.dart';
 import '../../domain/repositories/example_sentence_repository.dart';
 import '../../domain/repositories/note_repository.dart';
@@ -66,4 +68,8 @@ final upsertNoteUseCaseProvider = Provider<UpsertNoteUseCase>(
 
 final deleteNoteUseCaseProvider = Provider<DeleteNoteUseCase>(
   (Ref ref) => DeleteNoteUseCase(ref.watch(noteRepositoryProvider)),
+);
+
+final particleInfoByFormProvider = Provider<Map<String, ParticleInfoEntity>>(
+  (Ref ref) => mockKoreanParticlesByForm,
 );
