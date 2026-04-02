@@ -128,19 +128,7 @@ class ThemePreviewSheet extends StatelessWidget {
                           ],
                         ),
                         const SizedBox(height: 14),
-                        _sectionTitle(
-                          context: context,
-                          icon: Icons.psychology_alt_outlined,
-                          title: 'Parcours pédagogique',
-                          accentColor: accentColor,
-                        ),
-                        const SizedBox(height: 10),
-                        Wrap(
-                          spacing: 8,
-                          runSpacing: 8,
-                          children: _learningPathBadges(accentColor),
-                        ),
-                        const SizedBox(height: 18),
+                        const SizedBox(height: 4),
                         _sectionTitle(
                           context: context,
                           icon: Icons.workspace_premium_outlined,
@@ -163,6 +151,7 @@ class ThemePreviewSheet extends StatelessWidget {
                         const SizedBox(height: 10),
                         _ThemePreviewExerciseList(
                           exercises: exercises,
+                          theme: theme,
                           accentColor: accentColor,
                         ),
                       ],
@@ -189,24 +178,6 @@ class ThemePreviewSheet extends StatelessWidget {
       ),
     );
   }
-
-  List<Widget> _learningPathBadges(Color accentColor) {
-    final Set<LearningStage> includedStages = exercises
-        .map((ExerciseEntity e) => learningStageForType(e.type))
-        .toSet();
-
-    return List<Widget>.generate(learningStageProgression.length, (int index) {
-      final LearningStage stage = learningStageProgression[index];
-      final bool included = includedStages.contains(stage);
-      final String label = '${index + 1} ${learningStageDisplayLabel(stage)}';
-
-      return _PathBadge(
-        text: included ? label : '$label (à venir)',
-        included: included,
-        accentColor: accentColor,
-      );
-    });
-  }
 }
 
 class _PreviewBadge extends StatelessWidget {
@@ -229,38 +200,6 @@ class _PreviewBadge extends StatelessWidget {
         style: Theme.of(
           context,
         ).textTheme.bodySmall?.copyWith(color: accentColor),
-      ),
-    );
-  }
-}
-
-class _PathBadge extends StatelessWidget {
-  const _PathBadge({
-    required this.text,
-    required this.included,
-    required this.accentColor,
-  });
-
-  final String text;
-  final bool included;
-  final Color accentColor;
-
-  @override
-  Widget build(BuildContext context) {
-    return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 7),
-      decoration: BoxDecoration(
-        color: included
-            ? accentColor.withOpacity(0.75)
-            : Colors.grey.withOpacity(0.22),
-        borderRadius: BorderRadius.circular(999),
-      ),
-      child: Text(
-        text,
-        style: Theme.of(context).textTheme.bodySmall?.copyWith(
-          color: included ? Colors.white : Colors.black87,
-          fontWeight: FontWeight.w600,
-        ),
       ),
     );
   }
@@ -391,11 +330,16 @@ class _ThemePreviewRewards extends StatelessWidget {
 class _ThemePreviewExerciseList extends StatelessWidget {
   const _ThemePreviewExerciseList({
     required this.exercises,
+    required this.theme,
     required this.accentColor,
   });
 
   final List<ExerciseEntity> exercises;
+  final ThemeEntity theme;
   final Color accentColor;
+
+  bool get _isHangulTheme =>
+      theme.id == 't1' || theme.icon.toLowerCase() == 'hangul';
 
   Widget _emptyState() {
     return Container(
@@ -447,15 +391,103 @@ class _ThemePreviewExerciseList extends StatelessWidget {
     );
   }
 
+  Widget _hangulExerciseItem(
+    BuildContext context, {
+    required String title,
+    required String subtitle,
+  }) {
+    final textTheme = Theme.of(context).textTheme;
+
+    return Container(
+      width: double.infinity,
+      margin: const EdgeInsets.only(bottom: 10),
+      padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 14),
+      decoration: BoxDecoration(
+        borderRadius: BorderRadius.circular(16),
+        color: accentColor.withOpacity(0.08),
+        border: Border.all(color: accentColor.withOpacity(0.24)),
+      ),
+      child: Row(
+        children: <Widget>[
+          Icon(Icons.circle, size: 10, color: accentColor),
+          const SizedBox(width: 10),
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: <Widget>[
+                Text(title, style: textTheme.titleMedium),
+                const SizedBox(height: 2),
+                Text(subtitle, style: textTheme.bodySmall),
+              ],
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     if (exercises.isEmpty) {
       return _emptyState();
     }
 
+    if (_isHangulTheme) {
+      return Column(
+        children: <Widget>[
+          _hangulExerciseItem(
+            context,
+            title: 'QCM de lecture',
+            subtitle: '가 → ga',
+          ),
+          _hangulExerciseItem(
+            context,
+            title: 'Construire une syllabe',
+            subtitle: 'ㄱ + ㅏ → 가',
+          ),
+          _hangulExerciseItem(
+            context,
+            title: 'Reconnaissance audio',
+            subtitle: 'audio → choisir la syllabe',
+          ),
+          _hangulExerciseItem(
+            context,
+            title: 'Romanisation → Hangul',
+            subtitle: 'ga → 가',
+          ),
+          _hangulExerciseItem(
+            context,
+            title: 'Hangul → Romanisation',
+            subtitle: '가 → ga',
+          ),
+          _hangulExerciseItem(
+            context,
+            title: 'Écriture clavier Hangul',
+            subtitle: 'saisir la bonne syllabe',
+          ),
+          _hangulExerciseItem(
+            context,
+            title: 'Drag & drop',
+            subtitle: 'assembler consonnes et voyelles',
+          ),
+        ],
+      );
+    }
+
+    final List<ExerciseEntity> uniqueExercises = <ExerciseEntity>[];
+    final Set<String> seenLabels = <String>{};
+    for (final ExerciseEntity exercise in exercises) {
+      final String signature = '${exercise.type}|${exercise.questionText}';
+      if (seenLabels.add(signature)) {
+        uniqueExercises.add(exercise);
+      }
+      if (uniqueExercises.length >= 6) {
+        break;
+      }
+    }
+
     return Column(
-      children: exercises
-          .take(6)
+      children: uniqueExercises
           .map((ExerciseEntity exercise) => _exerciseItem(context, exercise))
           .toList(),
     );

@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
+import '../../data/models/hangul_letter.dart';
 import '../viewmodels/hangul_viewmodel.dart';
 import 'hangul_test_screen.dart';
 
@@ -13,147 +14,180 @@ class HangulLearningScreen extends ConsumerWidget {
 
     if (state.selectedLetters.isEmpty) {
       return Scaffold(
-        appBar: AppBar(title: const Text('Apprentissage Hangul')),
-        body: const Center(child: Text('Aucune lettre sélectionnée')),
+        appBar: AppBar(title: const Text('Module Hangul')),
+        body: const Center(child: Text('Aucune session active')),
       );
     }
 
-    final currentLetter = state.selectedLetters[state.currentIndex];
-    final isLastLetter = state.currentIndex == state.selectedLetters.length - 1;
+    final int step = state.currentIndex;
+    final List<String> titles = <String>[
+      '1. Présentation',
+      '2. Découverte',
+      '3. Construction',
+      '4. Lecture',
+      '5. Test',
+    ];
 
     return Scaffold(
-      appBar: AppBar(
-        title: const Text('Apprentissage Hangul'),
-        centerTitle: false,
-        elevation: 0,
-      ),
-      body: Column(
-        children: <Widget>[
-          // Barre de progression
-          Padding(
-            padding: const EdgeInsets.all(16),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.stretch,
+      appBar: AppBar(title: const Text('Leçon Hangul')),
+      body: Padding(
+        padding: const EdgeInsets.all(16),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.stretch,
+          children: <Widget>[
+            Text(titles[step], style: Theme.of(context).textTheme.titleLarge),
+            const SizedBox(height: 8),
+            LinearProgressIndicator(value: (step + 1) / 5),
+            const SizedBox(height: 16),
+            Expanded(child: _buildStepContent(context, state, step)),
+            Row(
               children: <Widget>[
-                Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                  children: <Widget>[
-                    Text(
-                      'Lettre ${state.currentIndex + 1} / ${state.selectedLetters.length}',
-                      style: Theme.of(context).textTheme.bodySmall,
-                    ),
-                    Chip(label: Text(state.selectedCategory?.name ?? 'Autres')),
-                  ],
-                ),
-                const SizedBox(height: 8),
-                LinearProgressIndicator(
-                  value:
-                      (state.currentIndex + 1) / state.selectedLetters.length,
-                ),
-              ],
-            ),
-          ),
-          // Contenu principal
-          Expanded(
-            child: Column(
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: <Widget>[
-                // Grande affichage de la lettre
-                Container(
-                  width: 180,
-                  height: 180,
-                  decoration: BoxDecoration(
-                    shape: BoxShape.circle,
-                    color: Theme.of(context).primaryColor.withOpacity(0.2),
-                  ),
-                  child: Center(
-                    child: Text(
-                      currentLetter.character,
-                      style: Theme.of(context).textTheme.displayLarge?.copyWith(
-                        fontSize: 120,
-                        fontWeight: FontWeight.bold,
-                      ),
-                    ),
+                Expanded(
+                  child: OutlinedButton(
+                    onPressed: step > 0
+                        ? () => ref
+                              .read(hangulViewModelProvider.notifier)
+                              .previousLessonStep()
+                        : null,
+                    child: const Text('Précédent'),
                   ),
                 ),
-                const SizedBox(height: 32),
-                // Romanisation
-                Text(
-                  'Prononciation',
-                  style: Theme.of(context).textTheme.labelSmall,
-                ),
-                const SizedBox(height: 8),
-                Card(
-                  elevation: 4,
-                  child: Padding(
-                    padding: const EdgeInsets.symmetric(
-                      horizontal: 24,
-                      vertical: 12,
-                    ),
-                    child: Text(
-                      currentLetter.romanization,
-                      style: Theme.of(context).textTheme.headlineSmall
-                          ?.copyWith(fontWeight: FontWeight.bold),
-                    ),
+                const SizedBox(width: 12),
+                Expanded(
+                  child: FilledButton(
+                    onPressed: () {
+                      if (step < 4) {
+                        ref
+                            .read(hangulViewModelProvider.notifier)
+                            .nextLessonStep();
+                        return;
+                      }
+                      ref.read(hangulViewModelProvider.notifier).startTest();
+                      Navigator.of(context).push(
+                        MaterialPageRoute<void>(
+                          builder: (_) => const HangulTestScreen(),
+                        ),
+                      );
+                    },
+                    child: Text(step < 4 ? 'Suivant' : 'Lancer le test'),
                   ),
                 ),
               ],
             ),
-          ),
-          // Boutons de contrôle
-          Padding(
-            padding: const EdgeInsets.all(16),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.stretch,
-              children: <Widget>[
-                // Boutons de navigation
-                Row(
-                  children: <Widget>[
-                    Expanded(
-                      child: OutlinedButton.icon(
-                        onPressed: state.currentIndex > 0
-                            ? () => ref
-                                  .read(hangulViewModelProvider.notifier)
-                                  .previousLetter()
-                            : null,
-                        icon: const Icon(Icons.arrow_back),
-                        label: const Text('Précédent'),
-                      ),
-                    ),
-                    const SizedBox(width: 12),
-                    Expanded(
-                      child: FilledButton.icon(
-                        onPressed: !isLastLetter
-                            ? () => ref
-                                  .read(hangulViewModelProvider.notifier)
-                                  .nextLetter()
-                            : null,
-                        icon: const Icon(Icons.arrow_forward),
-                        label: const Text('Suivant'),
-                      ),
-                    ),
-                  ],
-                ),
-                const SizedBox(height: 12),
-                // Bouton test
-                FilledButton.icon(
-                  onPressed: () {
-                    // Démarrer le mode test
-                    ref.read(hangulViewModelProvider.notifier).startTest();
-                    Navigator.of(context).push(
-                      MaterialPageRoute<void>(
-                        builder: (_) => const HangulTestScreen(),
-                      ),
-                    );
-                  },
-                  icon: const Icon(Icons.quiz_rounded),
-                  label: const Text('Passer au test'),
-                ),
-              ],
-            ),
-          ),
-        ],
+          ],
+        ),
       ),
     );
+  }
+
+  Widget _buildStepContent(
+    BuildContext context,
+    HangulSessionState state,
+    int step,
+  ) {
+    switch (step) {
+      case 0:
+        return ListView(
+          children: <Widget>[
+            Text('Consonnes', style: Theme.of(context).textTheme.titleMedium),
+            const SizedBox(height: 8),
+            Wrap(
+              spacing: 8,
+              runSpacing: 8,
+              children: state.selectedConsonants
+                  .map(
+                    (HangulLetter letter) => Chip(
+                      label: Text(
+                        '${letter.character} (${letter.romanization})',
+                      ),
+                    ),
+                  )
+                  .toList(),
+            ),
+            const SizedBox(height: 16),
+            Text('Voyelles', style: Theme.of(context).textTheme.titleMedium),
+            const SizedBox(height: 8),
+            Wrap(
+              spacing: 8,
+              runSpacing: 8,
+              children: state.selectedVowels
+                  .map(
+                    (HangulLetter letter) => Chip(
+                      label: Text(
+                        '${letter.character} (${letter.romanization})',
+                      ),
+                    ),
+                  )
+                  .toList(),
+            ),
+          ],
+        );
+      case 1:
+        return ListView(
+          children: <Widget>[
+            Text(
+              'Syllabes générées automatiquement',
+              style: Theme.of(context).textTheme.titleMedium,
+            ),
+            const SizedBox(height: 12),
+            Wrap(
+              spacing: 8,
+              runSpacing: 8,
+              children: state.generatedSyllables
+                  .map(
+                    (HangulSyllable syllable) => Chip(
+                      label: Text(
+                        '${syllable.character} (${syllable.romanization})',
+                      ),
+                    ),
+                  )
+                  .toList(),
+            ),
+          ],
+        );
+      case 2:
+        return Center(
+          child: Text(
+            '${state.selectedConsonants.first.character} + ${state.selectedVowels.first.character} → ${state.generatedSyllables.first.character}',
+            style: Theme.of(context).textTheme.headlineSmall,
+            textAlign: TextAlign.center,
+          ),
+        );
+      case 3:
+        return ListView(
+          children: state.generatedSyllables
+              .take(5)
+              .map(
+                (HangulSyllable syllable) => ListTile(
+                  title: Text(
+                    syllable.character,
+                    style: Theme.of(context).textTheme.headlineSmall,
+                  ),
+                  subtitle: Text(syllable.romanization),
+                ),
+              )
+              .toList(),
+        );
+      default:
+        return Card(
+          child: Padding(
+            padding: const EdgeInsets.all(16),
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: <Widget>[
+                Text(
+                  state.trainingMode
+                      ? 'Mode entraînement: 50 questions aléatoires'
+                      : 'Petit test final: 5 questions',
+                  style: Theme.of(context).textTheme.titleMedium,
+                ),
+                const SizedBox(height: 8),
+                const Text('Feedback immédiat après chaque réponse.'),
+              ],
+            ),
+          ),
+        );
+    }
   }
 }

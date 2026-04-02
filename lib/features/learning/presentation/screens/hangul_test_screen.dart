@@ -1,3 +1,5 @@
+import 'dart:math';
+
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
@@ -5,26 +7,21 @@ import '../../data/models/hangul_letter.dart';
 import '../viewmodels/hangul_progress_viewmodel.dart';
 import '../viewmodels/hangul_viewmodel.dart';
 
-List<HangulLetter> _flattenAllHangulLetters() => hangulCategoriesData
-    .expand((HangulCategory category) => category.letters)
-    .toList(growable: false);
-
-String _hangulFamilyOf(HangulLetter letter) {
-  if (letter.category.startsWith('vowel')) {
-    return 'vowel';
-  }
-  if (letter.category.startsWith('consonant')) {
-    return 'consonant';
-  }
-  return letter.category;
-}
-
-List<HangulLetter> _sameFamilyLetters(HangulLetter letter) {
-  final String family = _hangulFamilyOf(letter);
-  return _flattenAllHangulLetters()
-      .where((HangulLetter other) => _hangulFamilyOf(other) == family)
-      .toList(growable: false);
-}
+const List<String> _pedagogicalProgressionLabels = <String>[
+  '1. Structure des syllabes',
+  '2. Voyelles de base',
+  '3. Consonnes de base',
+  '4. Premières syllabes',
+  '5. Premiers mots simples',
+  '6. Batchim',
+  '7. Batchim doubles',
+  '8. Règles de liaison',
+  '9. Assimilations de prononciation',
+  '10. Voyelles composées',
+  '11. Consonnes doubles',
+  '12. Mots plus complexes',
+  '13. Phrases simples',
+];
 
 class HangulTestScreen extends ConsumerStatefulWidget {
   const HangulTestScreen({super.key});
@@ -37,198 +34,308 @@ class _HangulTestScreenState extends ConsumerState<HangulTestScreen> {
   late List<HangulTestQuestion> _questions;
   int _currentQuestionIndex = 0;
   String? _selectedAnswer;
+  late final TextEditingController _textController;
 
   @override
   void initState() {
     super.initState();
+    _textController = TextEditingController();
     _generateQuestions();
   }
 
-  void _generateQuestions() {
-    final state = ref.read(hangulViewModelProvider);
-    final letters = state.selectedLetters;
-
-    _questions = <HangulTestQuestion>[];
-
-    // Générer deux types de questions
-    for (int i = 0; i < letters.length; i++) {
-      final letter = letters[i];
-      final List<HangulLetter> familyPool = _sameFamilyLetters(letter);
-
-      // Question type 1: Afficher la lettre, demander la romanisation
-      _questions.add(
-        HangulTestQuestion(
-          id: '${letter.id}_1',
-          type: HangulTestType.recognitionToRomanization,
-          correctLetter: letter,
-          correctAnswer: letter.romanization,
-          options: _generateOptions(
-            correct: letter.romanization,
-            allLetters: familyPool,
-            isRomanization: true,
-          ),
-        ),
-      );
-
-      // Question type 2: Afficher la romanisation, demander la lettre
-      _questions.add(
-        HangulTestQuestion(
-          id: '${letter.id}_2',
-          type: HangulTestType.romanizationToRecognition,
-          correctLetter: letter,
-          correctAnswer: letter.character,
-          options: _generateOptions(
-            correct: letter.character,
-            allLetters: familyPool,
-            isRomanization: false,
-          ),
-        ),
-      );
-    }
-
-    // Mélanger les questions
-    _questions.shuffle();
+  @override
+  void dispose() {
+    _textController.dispose();
+    super.dispose();
   }
 
-  List<String> _generateOptions({
-    required String correct,
-    required List<HangulLetter> allLetters,
-    required bool isRomanization,
-  }) {
-    final Set<String> options = <String>{correct};
+  void _generateQuestions() {
+    final HangulSessionState state = ref.read(hangulViewModelProvider);
+    final Random random = Random();
+    final List<HangulSyllable> syllables = state.generatedSyllables;
+    final List<HangulLetter> consonants = state.selectedConsonants;
+    final List<HangulLetter> vowels = state.selectedVowels;
 
-    final List<String> pool = allLetters
-        .map(
-          (HangulLetter letter) =>
-              isRomanization ? letter.romanization : letter.character,
-        )
-        .where((String option) => option != correct)
-        .toSet()
-        .toList();
-    pool.shuffle();
+    final List<HangulTestQuestion> generated = <HangulTestQuestion>[];
+    final int target = state.targetLessonExercises;
+    final List<HangulExerciseType> selectedTypes =
+        state.selectedExerciseTypes.isEmpty
+        ? HangulExerciseType.values
+        : state.selectedExerciseTypes;
 
-    for (final String option in pool) {
-      if (options.length >= 4) break;
-      options.add(option);
+    if (syllables.isEmpty || consonants.isEmpty || vowels.isEmpty) {
+      _questions = <HangulTestQuestion>[];
+      return;
     }
 
-    if (options.length < 4) {
-      final List<String> fallback = isRomanization
-          ? <String>[
-              'a',
-              'eo',
-              'o',
-              'u',
-              'ya',
-              'yo',
-              'yu',
-              'eu',
-              'i',
-              'wa',
-              'we',
-              'wi',
-            ]
-          : <String>[
-              'ㄱ',
-              'ㄴ',
-              'ㄷ',
-              'ㄹ',
-              'ㅁ',
-              'ㅂ',
-              'ㅅ',
-              'ㅇ',
-              'ㅈ',
-              'ㅊ',
-              'ㅋ',
-              'ㅌ',
-              'ㅍ',
-              'ㅎ',
-              'ㅏ',
-              'ㅗ',
-              'ㅜ',
-              'ㅡ',
-              'ㅣ',
-            ];
+    int cursor = 0;
+    while (generated.length < target) {
+      final HangulExerciseType type =
+          selectedTypes[cursor % selectedTypes.length];
+      generated.add(
+        _buildQuestionForType(
+          type: type,
+          index: generated.length,
+          syllables: syllables,
+          consonants: consonants,
+          vowels: vowels,
+          random: random,
+        ),
+      );
+      cursor++;
+    }
 
-      for (final String option in fallback) {
-        if (options.length >= 4) break;
-        if (option != correct) {
-          options.add(option);
-        }
+    generated.shuffle(random);
+    _questions = generated;
+  }
+
+  HangulTestQuestion _buildQuestionForType({
+    required HangulExerciseType type,
+    required int index,
+    required List<HangulSyllable> syllables,
+    required List<HangulLetter> consonants,
+    required List<HangulLetter> vowels,
+    required Random random,
+  }) {
+    final HangulSyllable syllable = syllables[index % syllables.length];
+    final HangulLetter consonant = consonants[index % consonants.length];
+    final HangulLetter vowel = vowels[index % vowels.length];
+
+    switch (type) {
+      case HangulExerciseType.qcmReading:
+        return HangulTestQuestion(
+          id: 'q_${index}_qcm_reading',
+          exerciseType: type,
+          stageLabel: _pedagogicalProgressionLabels[3],
+          prompt: 'QCM de lecture : choisissez la bonne romanisation',
+          displayValue: syllable.character,
+          correctAnswer: syllable.romanization,
+          options: _buildOptions(
+            correct: syllable.romanization,
+            pool: syllables
+                .map((HangulSyllable s) => s.romanization)
+                .toList(growable: false),
+            fallback: const <String>['ga', 'na', 'da', 'ra', 'ma', 'ba'],
+            random: random,
+          ),
+        );
+      case HangulExerciseType.syllableComposition:
+        final HangulSyllable composed = HangulSyllable(
+          consonant: consonant,
+          vowel: vowel,
+          character: composeHangulSyllable(
+            consonant.character,
+            vowel.character,
+          ),
+          romanization: _normalize(consonant.romanization) + vowel.romanization,
+        );
+        return HangulTestQuestion(
+          id: 'q_${index}_compose',
+          exerciseType: type,
+          stageLabel: _pedagogicalProgressionLabels[0],
+          prompt: 'Construisez la bonne syllabe',
+          displayValue: '${consonant.character} + ${vowel.character}',
+          correctAnswer: composed.character,
+          options: _buildOptions(
+            correct: composed.character,
+            pool: syllables
+                .map((HangulSyllable s) => s.character)
+                .toList(growable: false),
+            fallback: const <String>['가', '고', '나', '노', '다', '도'],
+            random: random,
+          ),
+        );
+      case HangulExerciseType.audioRecognition:
+        return HangulTestQuestion(
+          id: 'q_${index}_audio',
+          exerciseType: type,
+          stageLabel: _pedagogicalProgressionLabels[4],
+          prompt: 'Reconnaissance audio : choisissez la syllabe entendue',
+          displayValue: '🔊 ${syllable.romanization}',
+          correctAnswer: syllable.character,
+          options: _buildOptions(
+            correct: syllable.character,
+            pool: syllables
+                .map((HangulSyllable s) => s.character)
+                .toList(growable: false),
+            fallback: const <String>['가', '나', '다', '라', '마', '바'],
+            random: random,
+          ),
+        );
+      case HangulExerciseType.romanizationToHangul:
+        return HangulTestQuestion(
+          id: 'q_${index}_r2h',
+          exerciseType: type,
+          stageLabel: _pedagogicalProgressionLabels[4],
+          prompt: 'Romanisation → Hangul',
+          displayValue: syllable.romanization,
+          correctAnswer: syllable.character,
+          options: _buildOptions(
+            correct: syllable.character,
+            pool: syllables
+                .map((HangulSyllable s) => s.character)
+                .toList(growable: false),
+            fallback: const <String>['가', '나', '다', '라', '마', '바'],
+            random: random,
+          ),
+        );
+      case HangulExerciseType.hangulToRomanization:
+        return HangulTestQuestion(
+          id: 'q_${index}_h2r',
+          exerciseType: type,
+          stageLabel: _pedagogicalProgressionLabels[3],
+          prompt: 'Hangul → Romanisation',
+          displayValue: syllable.character,
+          correctAnswer: syllable.romanization,
+          options: _buildOptions(
+            correct: syllable.romanization,
+            pool: syllables
+                .map((HangulSyllable s) => s.romanization)
+                .toList(growable: false),
+            fallback: const <String>['ga', 'na', 'da', 'ra', 'ma', 'ba'],
+            random: random,
+          ),
+        );
+      case HangulExerciseType.keyboardWriting:
+        return HangulTestQuestion(
+          id: 'q_${index}_keyboard',
+          exerciseType: type,
+          stageLabel: _pedagogicalProgressionLabels[4],
+          prompt: 'Écrivez la syllabe Hangul avec votre clavier',
+          displayValue: syllable.romanization,
+          correctAnswer: syllable.character,
+          options: const <String>[],
+          requiresTextInput: true,
+        );
+      case HangulExerciseType.dragDropComposition:
+        final String correctPair =
+            '${consonant.character} + ${vowel.character}';
+        final List<String> pairPool = <String>[
+          for (final HangulLetter c in consonants.take(4))
+            for (final HangulLetter v in vowels.take(4))
+              '${c.character} + ${v.character}',
+        ];
+        return HangulTestQuestion(
+          id: 'q_${index}_dragdrop',
+          exerciseType: type,
+          stageLabel: _pedagogicalProgressionLabels[0],
+          prompt: 'Drag & drop : choisissez la bonne combinaison',
+          displayValue: composeHangulSyllable(
+            consonant.character,
+            vowel.character,
+          ),
+          correctAnswer: correctPair,
+          options: _buildOptions(
+            correct: correctPair,
+            pool: pairPool,
+            fallback: const <String>['ㄱ + ㅏ', 'ㄴ + ㅏ', 'ㄱ + ㅗ', 'ㄴ + ㅗ'],
+            random: random,
+          ),
+        );
+    }
+  }
+
+  List<String> _buildOptions({
+    required String correct,
+    required List<String> pool,
+    required List<String> fallback,
+    required Random random,
+  }) {
+    final Set<String> options = <String>{correct};
+    final List<String> candidates =
+        pool.where((String value) => value != correct).toSet().toList()
+          ..shuffle(random);
+
+    for (final String value in candidates) {
+      if (options.length >= 4) {
+        break;
+      }
+      options.add(value);
+    }
+
+    for (final String value in fallback) {
+      if (options.length >= 4) {
+        break;
+      }
+      if (value != correct) {
+        options.add(value);
       }
     }
 
-    final List<String> optionsList = options.toList();
-    optionsList.shuffle();
-
-    if (!optionsList.contains(correct)) {
-      optionsList[0] = correct;
-      optionsList.shuffle();
-    }
-
-    return optionsList.take(4).toList();
+    final List<String> result = options.toList()..shuffle(random);
+    return result.take(4).toList(growable: false);
   }
 
   void _answerQuestion(String answer) {
-    final question = _questions[_currentQuestionIndex];
-    final isCorrect = answer == question.correctAnswer;
+    final HangulTestQuestion question = _questions[_currentQuestionIndex];
+    final bool isCorrect =
+        _normalize(answer) == _normalize(question.correctAnswer);
 
-    // Enregistrer la réponse
     ref
         .read(hangulViewModelProvider.notifier)
-        .recordTestAnswer(question.correctLetter.id, isCorrect);
+        .recordTestAnswer(question.id, isCorrect);
 
     setState(() {
       _selectedAnswer = answer;
     });
 
-    // Afficher le feedback et avancer
-    Future.delayed(const Duration(milliseconds: 1500), () {
-      if (mounted) {
-        if (_currentQuestionIndex < _questions.length - 1) {
-          setState(() {
-            _currentQuestionIndex++;
-            _selectedAnswer = null;
-          });
-        } else {
-          // Test terminé
-          ref.read(hangulViewModelProvider.notifier).endTest();
-          Navigator.of(context).push(
-            MaterialPageRoute<void>(
-              builder: (_) => const HangulTestResultScreen(),
-            ),
-          );
-        }
+    Future.delayed(const Duration(milliseconds: 900), () {
+      if (!mounted) {
+        return;
+      }
+
+      if (_currentQuestionIndex < _questions.length - 1) {
+        setState(() {
+          _currentQuestionIndex++;
+          _selectedAnswer = null;
+          _textController.clear();
+        });
+      } else {
+        ref.read(hangulViewModelProvider.notifier).endTest();
+        Navigator.of(context).push(
+          MaterialPageRoute<void>(
+            builder: (_) => const HangulTestResultScreen(),
+          ),
+        );
       }
     });
   }
 
+  void _submitTypedAnswer() {
+    final String typed = _textController.text.trim();
+    if (typed.isEmpty || _selectedAnswer != null) {
+      return;
+    }
+    _answerQuestion(typed);
+  }
+
   @override
   Widget build(BuildContext context) {
-    final question = _questions[_currentQuestionIndex];
-    final isAnswered = _selectedAnswer != null;
+    if (_questions.isEmpty) {
+      return Scaffold(
+        appBar: AppBar(title: const Text('Test Hangul')),
+        body: const Center(child: Text('Impossible de générer des questions.')),
+      );
+    }
+
+    final HangulTestQuestion question = _questions[_currentQuestionIndex];
+    final bool isAnswered = _selectedAnswer != null;
 
     return Scaffold(
-      appBar: AppBar(title: const Text('Test Hangul'), centerTitle: false),
+      appBar: AppBar(title: const Text('Test Hangul')),
       body: Column(
         children: <Widget>[
-          // Barre de progression
           Padding(
             padding: const EdgeInsets.all(16),
             child: Column(
-              crossAxisAlignment: CrossAxisAlignment.stretch,
               children: <Widget>[
                 Row(
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: <Widget>[
                     Text(
-                      'Question ${_currentQuestionIndex + 1} / ${_questions.length}',
-                      style: Theme.of(context).textTheme.bodySmall,
+                      'Question ${_currentQuestionIndex + 1}/${_questions.length}',
                     ),
-                    Text(
-                      _getQuestionTypeLabel(question.type),
-                      style: Theme.of(context).textTheme.labelSmall,
-                    ),
+                    Text(_typeLabel(question.exerciseType)),
                   ],
                 ),
                 const SizedBox(height: 8),
@@ -238,28 +345,38 @@ class _HangulTestScreenState extends ConsumerState<HangulTestScreen> {
               ],
             ),
           ),
-          // Contenu du test
-          Expanded(
+          Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 16),
+            child: Align(
+              alignment: Alignment.centerLeft,
+              child: Chip(label: Text(question.stageLabel)),
+            ),
+          ),
+          const SizedBox(height: 6),
+          Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 24),
             child: Column(
-              mainAxisAlignment: MainAxisAlignment.center,
               children: <Widget>[
-                // Question
-                Padding(
-                  padding: const EdgeInsets.all(24),
-                  child: Column(
-                    children: <Widget>[
-                      Text(
-                        _getQuestionText(question.type),
-                        style: Theme.of(context).textTheme.labelSmall,
-                      ),
-                      const SizedBox(height: 24),
-                      _buildQuestionContent(question),
-                    ],
+                Text(
+                  question.prompt,
+                  style: Theme.of(context).textTheme.labelLarge,
+                  textAlign: TextAlign.center,
+                ),
+                const SizedBox(height: 18),
+                Text(
+                  question.displayValue,
+                  style: Theme.of(context).textTheme.displaySmall?.copyWith(
+                    fontWeight: FontWeight.bold,
                   ),
                 ),
-                // Options
-                Expanded(
-                  child: Padding(
+              ],
+            ),
+          ),
+          const SizedBox(height: 12),
+          Expanded(
+            child: question.requiresTextInput
+                ? _buildTextInputAnswerArea(question, isAnswered)
+                : Padding(
                     padding: const EdgeInsets.fromLTRB(12, 8, 12, 12),
                     child: GridView.count(
                       crossAxisCount: 2,
@@ -277,42 +394,48 @@ class _HangulTestScreenState extends ConsumerState<HangulTestScreen> {
                           .toList(),
                     ),
                   ),
-                ),
-              ],
-            ),
           ),
         ],
       ),
     );
   }
 
-  Widget _buildQuestionContent(HangulTestQuestion question) {
-    if (question.type == HangulTestType.recognitionToRomanization) {
-      // Afficher la lettre, demander la prononciation
-      return Text(
-        question.correctLetter.character,
-        style: Theme.of(context).textTheme.displayLarge?.copyWith(
-          fontSize: 100,
-          fontWeight: FontWeight.bold,
-        ),
-      );
-    } else {
-      // Afficher la prononciation, demander la lettre
-      return Text(
-        question.correctLetter.romanization,
-        style: Theme.of(
-          context,
-        ).textTheme.headlineSmall?.copyWith(fontWeight: FontWeight.bold),
-      );
-    }
-  }
+  Widget _buildTextInputAnswerArea(
+    HangulTestQuestion question,
+    bool isAnswered,
+  ) {
+    final bool typedCorrect =
+        isAnswered &&
+        _normalize(_selectedAnswer ?? '') == _normalize(question.correctAnswer);
 
-  String _getQuestionText(HangulTestType type) {
-    if (type == HangulTestType.recognitionToRomanization) {
-      return 'Quelle est la prononciation ?';
-    } else {
-      return 'Quelle est la lettre ?';
-    }
+    return Padding(
+      padding: const EdgeInsets.all(16),
+      child: Column(
+        children: <Widget>[
+          TextField(
+            controller: _textController,
+            enabled: !isAnswered,
+            decoration: const InputDecoration(
+              labelText: 'Votre réponse en Hangul',
+              border: OutlineInputBorder(),
+            ),
+            onSubmitted: (_) => _submitTypedAnswer(),
+          ),
+          const SizedBox(height: 12),
+          FilledButton(
+            onPressed: isAnswered ? null : _submitTypedAnswer,
+            child: const Text('Valider'),
+          ),
+          const SizedBox(height: 12),
+          if (isAnswered)
+            Text(
+              typedCorrect
+                  ? '✅ Correct'
+                  : '❌ Incorrect (bonne réponse: ${question.correctAnswer})',
+            ),
+        ],
+      ),
+    );
   }
 
   Widget _buildOptionButton(
@@ -320,10 +443,10 @@ class _HangulTestScreenState extends ConsumerState<HangulTestScreen> {
     HangulTestQuestion question,
     bool isAnswered,
   ) {
-    final isSelected = _selectedAnswer == option;
-    final isCorrect = option == question.correctAnswer;
-    final shouldShowCorrect = isAnswered && isCorrect;
-    final shouldShowIncorrect = isAnswered && isSelected && !isCorrect;
+    final bool isSelected = _selectedAnswer == option;
+    final bool isCorrect = option == question.correctAnswer;
+    final bool shouldShowCorrect = isAnswered && isCorrect;
+    final bool shouldShowIncorrect = isAnswered && isSelected && !isCorrect;
 
     Color? backgroundColor;
     if (shouldShowCorrect) {
@@ -360,74 +483,87 @@ class _HangulTestScreenState extends ConsumerState<HangulTestScreen> {
     );
   }
 
-  String _getQuestionTypeLabel(HangulTestType type) {
-    return type == HangulTestType.recognitionToRomanization
-        ? 'Lettre → Prononciation'
-        : 'Prononciation → Lettre';
+  String _typeLabel(HangulExerciseType type) {
+    switch (type) {
+      case HangulExerciseType.qcmReading:
+        return 'QCM lecture';
+      case HangulExerciseType.syllableComposition:
+        return 'Construire syllabe';
+      case HangulExerciseType.audioRecognition:
+        return 'Reconnaissance audio';
+      case HangulExerciseType.romanizationToHangul:
+        return 'Romanisation → Hangul';
+      case HangulExerciseType.hangulToRomanization:
+        return 'Hangul → Romanisation';
+      case HangulExerciseType.keyboardWriting:
+        return 'Écriture clavier';
+      case HangulExerciseType.dragDropComposition:
+        return 'Drag & drop';
+    }
   }
 }
 
-// Classe pour les questions de test
+String _normalize(String value) {
+  if (!value.contains('/')) {
+    return value.trim().toLowerCase();
+  }
+  return value.split('/').first.trim().toLowerCase();
+}
+
 class HangulTestQuestion {
   const HangulTestQuestion({
     required this.id,
-    required this.type,
-    required this.correctLetter,
+    required this.exerciseType,
+    required this.stageLabel,
+    required this.prompt,
+    required this.displayValue,
     required this.correctAnswer,
     required this.options,
+    this.requiresTextInput = false,
   });
 
   final String id;
-  final HangulTestType type;
-  final HangulLetter correctLetter;
+  final HangulExerciseType exerciseType;
+  final String stageLabel;
+  final String prompt;
+  final String displayValue;
   final String correctAnswer;
   final List<String> options;
+  final bool requiresTextInput;
 }
 
-// Types de questions
-enum HangulTestType {
-  recognitionToRomanization, // Lettre → Prononciation
-  romanizationToRecognition, // Prononciation → Lettre
-}
-
-// Écran de résultats
 class HangulTestResultScreen extends ConsumerWidget {
   const HangulTestResultScreen({super.key});
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final state = ref.watch(hangulViewModelProvider);
-    final score = state.getTestScore();
-    final percentage = (score * 100).toStringAsFixed(0);
-    final total = state.testResults.length;
-    final correct = state.testResults.values.where((bool v) => v).length;
+    final HangulSessionState state = ref.watch(hangulViewModelProvider);
+    final double score = state.getTestScore();
+    final String percentage = (score * 100).toStringAsFixed(0);
+    final int total = state.testResults.length;
+    final int correct = state.testResults.values.where((bool v) => v).length;
+    final int totalPoints = total * 10;
+    final int correctPoints = correct * 10;
 
-    // Calcul des points: 10 points par bonne réponse
-    final totalPoints = total * 10;
-    final correctPoints = correct * 10;
-
-    // Sauvegarder la progression
     WidgetsBinding.instance.addPostFrameCallback((_) {
-      if (state.selectedCategory != null) {
-        // Sauvegarder le score
+      final String scoreKey = state.trainingMode
+          ? 'hangul_training'
+          : 'hangul_core';
+      ref
+          .read(hangulProgressViewModelProvider.notifier)
+          .saveCategoryScore(scoreKey, score);
+
+      final Set<String> letterIds = state.selectedLetters
+          .map((HangulLetter letter) => letter.id)
+          .toSet();
+      ref
+          .read(hangulProgressViewModelProvider.notifier)
+          .addLearnedLetters(letterIds);
+
+      if (score >= 0.8) {
         ref
             .read(hangulProgressViewModelProvider.notifier)
-            .saveCategoryScore(state.selectedCategory!.id, score);
-
-        // Sauvegarder les lettres apprises
-        final letterIds = state.selectedLetters
-            .map((HangulLetter l) => l.id)
-            .toSet();
-        ref
-            .read(hangulProgressViewModelProvider.notifier)
-            .addLearnedLetters(letterIds);
-
-        // Marquer comme complétée si score >= 80%
-        if (score >= 0.8) {
-          ref
-              .read(hangulProgressViewModelProvider.notifier)
-              .markCategoryCompleted(state.selectedCategory!.id);
-        }
+            .markCategoryCompleted(scoreKey);
       }
     });
 
@@ -437,138 +573,39 @@ class HangulTestResultScreen extends ConsumerWidget {
         automaticallyImplyLeading: false,
       ),
       body: Center(
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: <Widget>[
-            // Score circulaire
-            Container(
-              width: 180,
-              height: 180,
-              decoration: BoxDecoration(
-                shape: BoxShape.circle,
-                color: score >= 0.8
-                    ? Colors.green.withOpacity(0.2)
-                    : score >= 0.6
-                    ? Colors.orange.withOpacity(0.2)
-                    : Colors.red.withOpacity(0.2),
+        child: Padding(
+          padding: const EdgeInsets.all(16),
+          child: Column(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: <Widget>[
+              Text(
+                '$percentage%',
+                style: Theme.of(
+                  context,
+                ).textTheme.displayLarge?.copyWith(fontWeight: FontWeight.bold),
               ),
-              child: Center(
-                child: Column(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  children: <Widget>[
-                    Text(
-                      '$percentage%',
-                      style: Theme.of(context).textTheme.displayMedium
-                          ?.copyWith(
-                            fontWeight: FontWeight.bold,
-                            color: score >= 0.8
-                                ? Colors.green
-                                : score >= 0.6
-                                ? Colors.orange
-                                : Colors.red,
-                          ),
-                    ),
-                    const SizedBox(height: 8),
-                    Text(
-                      '$correctPoints/$totalPoints',
-                      style: Theme.of(context).textTheme.headlineMedium
-                          ?.copyWith(
-                            fontWeight: FontWeight.bold,
-                            color: score >= 0.8
-                                ? Colors.green
-                                : score >= 0.6
-                                ? Colors.orange
-                                : Colors.red,
-                          ),
-                    ),
-                    Text(
-                      'points obtenus',
-                      style: Theme.of(context).textTheme.bodySmall,
-                    ),
-                  ],
-                ),
+              const SizedBox(height: 8),
+              Text(
+                '$correctPoints/$totalPoints points',
+                style: Theme.of(context).textTheme.titleLarge,
               ),
-            ),
-            const SizedBox(height: 32),
-            // Feedback
-            Card(
-              child: Padding(
-                padding: const EdgeInsets.all(16),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: <Widget>[
-                    Text(
-                      _getFeedback(score),
-                      style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                        fontWeight: FontWeight.bold,
-                      ),
-                    ),
-                    const SizedBox(height: 8),
-                    Text(
-                      _getDetailedFeedback(state),
-                      style: Theme.of(context).textTheme.bodySmall,
-                    ),
-                  ],
-                ),
+              const SizedBox(height: 8),
+              Text('$correct/$total réponses correctes'),
+              const SizedBox(height: 24),
+              FilledButton.icon(
+                onPressed: () {
+                  ref.read(hangulViewModelProvider.notifier).resetSession();
+                  Navigator.of(
+                    context,
+                  ).popUntil((Route<dynamic> route) => route.isFirst);
+                },
+                icon: const Icon(Icons.home),
+                label: const Text('Retour aux cours'),
               ),
-            ),
-            const SizedBox(height: 32),
-            // Boutons d'action
-            Padding(
-              padding: const EdgeInsets.all(16),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.stretch,
-                children: <Widget>[
-                  FilledButton.icon(
-                    onPressed: () {
-                      ref.read(hangulViewModelProvider.notifier).resetSession();
-                      Navigator.of(
-                        context,
-                      ).popUntil((Route<dynamic> route) => route.isFirst);
-                    },
-                    icon: const Icon(Icons.home),
-                    label: const Text('Retour aux cours'),
-                  ),
-                  const SizedBox(height: 12),
-                  if (score < 0.8)
-                    OutlinedButton.icon(
-                      onPressed: () {
-                        ref
-                            .read(hangulViewModelProvider.notifier)
-                            .resetSession();
-                        Navigator.of(context).pop();
-                        Navigator.of(context).pop();
-                      },
-                      icon: const Icon(Icons.repeat),
-                      label: const Text('Réapprendre cette catégorie'),
-                    ),
-                ],
-              ),
-            ),
-          ],
+            ],
+          ),
         ),
       ),
     );
-  }
-
-  String _getFeedback(double score) {
-    if (score >= 0.9) {
-      return '🎉 Excellent ! Vous maîtrisez parfaitement !';
-    } else if (score >= 0.8) {
-      return '✅ Très bien ! Continuez ainsi !';
-    } else if (score >= 0.6) {
-      return '👍 Pas mal ! Révisez et réessayez !';
-    } else {
-      return '📚 À revoir - Prenez le temps d\'apprendre !';
-    }
-  }
-
-  String _getDetailedFeedback(HangulSessionState state) {
-    final total = state.testResults.length;
-    final correct = state.testResults.values.where((bool v) => v).length;
-    final totalPoints = total * 10;
-    final correctPoints = correct * 10;
-
-    return 'Vous avez obtenu $correctPoints/$totalPoints points ($correct/$total réponses correctes).';
   }
 }

@@ -1,8 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
-import '../../data/models/hangul_letter.dart';
-import '../viewmodels/hangul_progress_viewmodel.dart';
 import '../viewmodels/hangul_viewmodel.dart';
 import 'hangul_learning_screen.dart';
 
@@ -16,29 +14,20 @@ class HangulCategorySelectionScreen extends ConsumerStatefulWidget {
 
 class _HangulCategorySelectionScreenState
     extends ConsumerState<HangulCategorySelectionScreen> {
-  HangulCategory? _selectedCategory;
-  late int _selectedCount;
+  int _selectedCount = 4;
+  bool _trainingMode = false;
+  Set<HangulExerciseType> _selectedExerciseTypes = HangulExerciseType.values
+      .toSet();
 
-  @override
-  void initState() {
-    super.initState();
-    _selectedCount = 2; // Valeur par défaut
-  }
-
-  void _startLearning() {
-    if (_selectedCategory == null) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Veuillez sélectionner une catégorie')),
-      );
-      return;
-    }
-
-    // Utiliser le viewmodel pour configurer la session
+  void _startSession() {
     ref
         .read(hangulViewModelProvider.notifier)
-        .selectCategoryWithCount(_selectedCategory!, _selectedCount);
+        .configureSession(
+          letterCount: _selectedCount,
+          trainingMode: _trainingMode,
+          selectedExerciseTypes: _selectedExerciseTypes.toList(),
+        );
 
-    // Naviguer vers l'écran d'apprentissage
     Navigator.of(context).push(
       MaterialPageRoute<void>(builder: (_) => const HangulLearningScreen()),
     );
@@ -46,170 +35,148 @@ class _HangulCategorySelectionScreenState
 
   @override
   Widget build(BuildContext context) {
-    final List<HangulCategory> categories = ref.watch(hangulCategoriesProvider);
-    final double courseProgress = ref.watch(hangulCourseProgressProvider);
-    final int completedCourseExercises = ref.watch(
-      hangulCourseCompletedCountProvider,
-    );
+    final int consonantCount = ref.watch(hangulConsonantCountProvider);
+    final int vowelCount = ref.watch(hangulVowelCountProvider);
+    final int totalAlphabetCount = ref.watch(hangulAlphabetTotalCountProvider);
+    final bool isFullAlphabet = _selectedCount == totalAlphabetCount;
 
     return Scaffold(
-      appBar: AppBar(title: const Text('Apprentissage Hangul')),
+      appBar: AppBar(title: const Text('Module Hangul')),
       body: SingleChildScrollView(
         child: Padding(
           padding: const EdgeInsets.all(16),
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.stretch,
             children: <Widget>[
-              // Instructions
               Card(
                 child: Padding(
                   padding: const EdgeInsets.all(12),
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: <Widget>[
-                      const Text(
-                        'Comment commencer ?',
-                        style: TextStyle(
-                          fontSize: 16,
-                          fontWeight: FontWeight.bold,
-                        ),
-                      ),
-                      const SizedBox(height: 8),
                       Text(
-                        '1. Sélectionnez une catégorie\n'
-                        '2. Choisissez le nombre de lettres\n'
-                        '3. Apprenez et testez-vous',
-                        style: Theme.of(context).textTheme.bodySmall,
-                      ),
-                    ],
-                  ),
-                ),
-              ),
-              const SizedBox(height: 24),
-
-              Card(
-                child: Padding(
-                  padding: const EdgeInsets.all(12),
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.stretch,
-                    children: <Widget>[
-                      Text(
-                        'Progression du cours Hangul',
+                        'Session par paires',
                         style: Theme.of(context).textTheme.titleMedium,
                       ),
                       const SizedBox(height: 8),
-                      LinearProgressIndicator(value: courseProgress),
-                      const SizedBox(height: 8),
                       Text(
-                        '$completedCourseExercises / 4 exercices terminés',
+                        isFullAlphabet
+                            ? 'Tout l\'alphabet: $consonantCount consonnes + $vowelCount voyelles'
+                            : '$_selectedCount lettres = ${_selectedCount ~/ 2} consonnes + ${_selectedCount ~/ 2} voyelles',
                         style: Theme.of(context).textTheme.bodySmall,
                       ),
                     ],
                   ),
                 ),
               ),
-              const SizedBox(height: 24),
-
-              // Sélection de catégorie
+              const SizedBox(height: 16),
               Text(
-                'Choisir une catégorie',
+                'Nombre de lettres par session',
                 style: Theme.of(context).textTheme.titleMedium,
               ),
-              const SizedBox(height: 12),
-              ...categories.map(
-                (HangulCategory category) => Padding(
-                  padding: const EdgeInsets.only(bottom: 8),
-                  child: Card(
-                    child: RadioListTile<HangulCategory>(
-                      title: Text(category.name),
-                      subtitle: Text(category.description),
-                      value: category,
-                      groupValue: _selectedCategory,
-                      onChanged: (HangulCategory? value) {
+              const SizedBox(height: 8),
+              Wrap(
+                spacing: 8,
+                children: <Widget>[
+                  ...<int>[4, 6, 8].map((int count) {
+                    return ChoiceChip(
+                      label: Text('$count lettres'),
+                      selected: _selectedCount == count,
+                      onSelected: (_) {
                         setState(() {
-                          _selectedCategory = value;
-                          // Réajuster le count si nécessaire
-                          if (_selectedCount > (value?.letters.length ?? 0)) {
-                            _selectedCount = value?.letters.length ?? 2;
-                          }
+                          _selectedCount = count;
                         });
                       },
-                    ),
+                    );
+                  }),
+                  ChoiceChip(
+                    label: const Text('Tout l\'alphabet'),
+                    selected: isFullAlphabet,
+                    onSelected: (_) {
+                      setState(() {
+                        _selectedCount = totalAlphabetCount;
+                      });
+                    },
                   ),
-                ),
+                ],
               ),
-              const SizedBox(height: 24),
-
-              // Sélection du nombre d'éléments
-              if (_selectedCategory != null) ...<Widget>[
-                Text(
-                  'Nombre de lettres à apprendre',
-                  style: Theme.of(context).textTheme.titleMedium,
-                ),
-                const SizedBox(height: 12),
-                Card(
-                  child: Padding(
-                    padding: const EdgeInsets.all(16),
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.stretch,
-                      children: <Widget>[
-                        // Slider
-                        Slider(
-                          value: _selectedCount.toDouble(),
-                          min: 1,
-                          max: _selectedCategory!.letters.length.toDouble(),
-                          divisions: _selectedCategory!.letters.length - 1,
-                          label: _selectedCount.toString(),
-                          onChanged: (double value) {
-                            setState(() {
-                              _selectedCount = value.toInt();
-                            });
-                          },
-                        ),
-                        const SizedBox(height: 12),
-                        // Affichage du compte sélectionné
-                        Center(
-                          child: Chip(
-                            label: Text(
-                              '$_selectedCount / ${_selectedCategory!.letters.length} lettres',
-                            ),
-                          ),
-                        ),
-                        const SizedBox(height: 12),
-                        // Preset buttons
-                        Wrap(
-                          spacing: 8,
-                          children: <int>[2, 4, 6].map((int count) {
-                            return OutlinedButton(
-                              onPressed:
-                                  count <= _selectedCategory!.letters.length
-                                  ? () {
-                                      setState(() {
-                                        _selectedCount = count;
-                                      });
-                                    }
-                                  : null,
-                              child: Text(count.toString()),
-                            );
-                          }).toList(),
-                        ),
-                      ],
-                    ),
-                  ),
-                ),
-                const SizedBox(height: 24),
-              ],
-
-              // Bouton de démarrage
+              const SizedBox(height: 16),
+              Text(
+                'Types d\'exercices à entraîner',
+                style: Theme.of(context).textTheme.titleMedium,
+              ),
+              const SizedBox(height: 8),
+              Wrap(
+                spacing: 8,
+                runSpacing: 8,
+                children: HangulExerciseType.values.map((
+                  HangulExerciseType type,
+                ) {
+                  final bool selected = _selectedExerciseTypes.contains(type);
+                  return FilterChip(
+                    label: Text(_exerciseTypeLabel(type)),
+                    selected: selected,
+                    onSelected: (bool value) {
+                      setState(() {
+                        if (value) {
+                          _selectedExerciseTypes.add(type);
+                        } else if (_selectedExerciseTypes.length > 1) {
+                          _selectedExerciseTypes.remove(type);
+                        }
+                      });
+                    },
+                  );
+                }).toList(),
+              ),
+              const SizedBox(height: 8),
+              Text(
+                'Sélectionnez au moins 1 type d\'exercice.',
+                style: Theme.of(context).textTheme.bodySmall,
+              ),
+              const SizedBox(height: 16),
+              SwitchListTile(
+                value: _trainingMode,
+                onChanged: (bool value) {
+                  setState(() {
+                    _trainingMode = value;
+                  });
+                },
+                title: const Text('Mode entraînement libre'),
+                subtitle: const Text('50 questions aléatoires'),
+              ),
+              const SizedBox(height: 8),
               FilledButton.icon(
-                onPressed: _startLearning,
-                icon: const Icon(Icons.school_rounded),
-                label: const Text('Commencer l\'apprentissage'),
+                onPressed: _startSession,
+                icon: Icon(_trainingMode ? Icons.fitness_center : Icons.school),
+                label: Text(
+                  _trainingMode
+                      ? 'Démarrer entraînement (50 questions)'
+                      : 'Démarrer leçon (5 exercices + test)',
+                ),
               ),
             ],
           ),
         ),
       ),
     );
+  }
+
+  String _exerciseTypeLabel(HangulExerciseType type) {
+    switch (type) {
+      case HangulExerciseType.qcmReading:
+        return 'QCM lecture';
+      case HangulExerciseType.syllableComposition:
+        return 'Construire syllabe';
+      case HangulExerciseType.audioRecognition:
+        return 'Reconnaissance audio';
+      case HangulExerciseType.romanizationToHangul:
+        return 'Romanisation → Hangul';
+      case HangulExerciseType.hangulToRomanization:
+        return 'Hangul → Romanisation';
+      case HangulExerciseType.keyboardWriting:
+        return 'Écriture clavier';
+      case HangulExerciseType.dragDropComposition:
+        return 'Drag & drop';
+    }
   }
 }
