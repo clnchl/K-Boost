@@ -36,11 +36,6 @@ class ExerciseCard extends StatelessWidget {
                     .map((String option) => Chip(label: Text(option)))
                     .toList(),
               ),
-              const SizedBox(height: 8),
-              Text(
-                'Reponse correcte: ${exercise.correctAnswer}',
-                style: Theme.of(context).textTheme.bodySmall,
-              ),
               if (onTap != null) ...<Widget>[
                 const SizedBox(height: 8),
                 Row(

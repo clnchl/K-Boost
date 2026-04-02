@@ -5,15 +5,18 @@ import '../../data/datasources/mock_particles.dart';
 import '../../data/repositories_impl/exercise_repository_impl.dart';
 import '../../data/repositories_impl/example_sentence_repository_impl.dart';
 import '../../data/repositories_impl/note_repository_impl.dart';
+import '../../data/repositories_impl/theme_repository_impl.dart';
 import '../../data/repositories_impl/word_repository_impl.dart';
 import '../../domain/entities/particle_info.dart';
 import '../../domain/repositories/exercise_repository.dart';
 import '../../domain/repositories/example_sentence_repository.dart';
 import '../../domain/repositories/note_repository.dart';
+import '../../domain/repositories/theme_repository.dart';
 import '../../domain/repositories/word_repository.dart';
 import '../../domain/usecases/delete_note_usecase.dart';
 import '../../domain/usecases/get_exercises_usecase.dart';
 import '../../domain/usecases/get_notes_usecase.dart';
+import '../../domain/usecases/get_themes_usecase.dart';
 import '../../domain/usecases/get_word_by_id_usecase.dart';
 import '../../domain/usecases/get_word_examples_usecase.dart';
 import '../../domain/usecases/get_words_usecase.dart';
@@ -30,6 +33,10 @@ final wordRepositoryProvider = Provider<WordRepository>(
 final exerciseRepositoryProvider = Provider<ExerciseRepository>(
   (Ref ref) =>
       ExerciseRepositoryImpl(ref.watch(learningLocalDatasourceProvider)),
+);
+
+final themeRepositoryProvider = Provider<ThemeRepository>(
+  (Ref ref) => ThemeRepositoryImpl(ref.watch(learningLocalDatasourceProvider)),
 );
 
 final noteRepositoryProvider = Provider<NoteRepository>(
@@ -51,6 +58,10 @@ final getWordByIdUseCaseProvider = Provider<GetWordByIdUseCase>(
 
 final getExercisesUseCaseProvider = Provider<GetExercisesUseCase>(
   (Ref ref) => GetExercisesUseCase(ref.watch(exerciseRepositoryProvider)),
+);
+
+final getThemesUseCaseProvider = Provider<GetThemesUseCase>(
+  (Ref ref) => GetThemesUseCase(ref.watch(themeRepositoryProvider)),
 );
 
 final getNotesUseCaseProvider = Provider<GetNotesUseCase>(

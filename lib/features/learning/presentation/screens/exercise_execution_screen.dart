@@ -3,6 +3,8 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../domain/entities/exercise.dart';
 import '../viewmodels/exercise_score_viewmodel.dart';
+import '../viewmodels/theme_progress_viewmodel.dart';
+import '../widgets/theme_ui_helpers.dart';
 
 class ExerciseExecutionScreen extends ConsumerStatefulWidget {
   const ExerciseExecutionScreen({super.key, required this.exercise});
@@ -18,8 +20,15 @@ class _ExerciseExecutionScreenState
     extends ConsumerState<ExerciseExecutionScreen> {
   String? _selectedOption;
   bool _isSubmitted = false;
+  late List<String> _shuffledOptions;
 
   bool get _isCorrect => _selectedOption == widget.exercise.correctAnswer;
+
+  @override
+  void initState() {
+    super.initState();
+    _shuffledOptions = List<String>.from(widget.exercise.options)..shuffle();
+  }
 
   void _submitAnswer() {
     if (_selectedOption == null) {
@@ -38,18 +47,99 @@ class _ExerciseExecutionScreenState
     ref
         .read(exerciseScoreViewModelProvider.notifier)
         .registerAttempt(isCorrect: isCorrect);
+    ref
+        .read(themeProgressViewModelProvider.notifier)
+        .markExerciseCompleted(widget.exercise.id);
   }
 
   void _resetExercise() {
     setState(() {
       _isSubmitted = false;
       _selectedOption = null;
+      _shuffledOptions = List<String>.from(widget.exercise.options)..shuffle();
     });
+  }
+
+  Color get _defaultOptionColor =>
+      Theme.of(context).colorScheme.surfaceContainerHighest;
+
+  Color _optionTileColor(String option) {
+    final bool isCorrect = option == widget.exercise.correctAnswer;
+    final bool isWrongSelected =
+        _isSubmitted && option == _selectedOption && !isCorrect;
+
+    if (!_isSubmitted) {
+      return _defaultOptionColor.withOpacity(0.2);
+    }
+    if (isCorrect) {
+      return Colors.green.withOpacity(0.18);
+    }
+    if (isWrongSelected) {
+      return Colors.red.withOpacity(0.18);
+    }
+    return _defaultOptionColor.withOpacity(0.1);
+  }
+
+  Widget? _optionTrailingIcon(String option) {
+    final bool isCorrect = option == widget.exercise.correctAnswer;
+    final bool isWrongSelected =
+        _isSubmitted && option == _selectedOption && !isCorrect;
+
+    if (!_isSubmitted) {
+      return null;
+    }
+    if (isCorrect) {
+      return const Icon(Icons.check_circle_rounded, color: Colors.green);
+    }
+    if (isWrongSelected) {
+      return const Icon(Icons.cancel_rounded, color: Colors.red);
+    }
+    return null;
+  }
+
+  Widget _buildOptionTile(String option) {
+    return RadioListTile<String>(
+      tileColor: _optionTileColor(option),
+      secondary: _optionTrailingIcon(option),
+      title: Text(option),
+      value: option,
+      groupValue: _selectedOption,
+      onChanged: _isSubmitted
+          ? null
+          : (String? value) => setState(() => _selectedOption = value),
+    );
+  }
+
+  Widget _buildResultCard(ExerciseEntity exercise) {
+    final textTheme = Theme.of(context).textTheme;
+
+    return Card(
+      color: _isCorrect
+          ? Colors.green.withOpacity(0.12)
+          : Colors.red.withOpacity(0.12),
+      child: Padding(
+        padding: const EdgeInsets.all(12),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: <Widget>[
+            Text(
+              _isCorrect ? 'Bonne reponse !' : 'Mauvaise reponse.',
+              style: textTheme.titleMedium,
+            ),
+            if (!_isCorrect) ...<Widget>[
+              const SizedBox(height: 6),
+              Text('Bonne reponse: ${exercise.correctAnswer}'),
+            ],
+          ],
+        ),
+      ),
+    );
   }
 
   @override
   Widget build(BuildContext context) {
     final ExerciseEntity exercise = widget.exercise;
+    final textTheme = Theme.of(context).textTheme;
     final ExerciseScoreState scoreState = ref.watch(
       exerciseScoreViewModelProvider,
     );
@@ -76,10 +166,7 @@ class _ExerciseExecutionScreenState
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: <Widget>[
-                  Text(
-                    'Score session',
-                    style: Theme.of(context).textTheme.titleMedium,
-                  ),
+                  Text('Score session', style: textTheme.titleMedium),
                   const SizedBox(height: 6),
                   Text('Points: ${scoreState.totalPoints}'),
                   Text('Tentatives: ${scoreState.totalAttempts}'),
@@ -90,27 +177,11 @@ class _ExerciseExecutionScreenState
             ),
           ),
           const SizedBox(height: 12),
-          Text(exercise.type, style: Theme.of(context).textTheme.titleSmall),
+          exerciseMetaChips(exercise.type),
           const SizedBox(height: 8),
-          Text(
-            exercise.questionText,
-            style: Theme.of(context).textTheme.headlineSmall,
-          ),
+          Text(exercise.questionText, style: textTheme.headlineSmall),
           const SizedBox(height: 16),
-          ...exercise.options.map(
-            (String option) => RadioListTile<String>(
-              title: Text(option),
-              value: option,
-              groupValue: _selectedOption,
-              onChanged: _isSubmitted
-                  ? null
-                  : (String? value) {
-                      setState(() {
-                        _selectedOption = value;
-                      });
-                    },
-            ),
-          ),
+          ..._shuffledOptions.map(_buildOptionTile),
           const SizedBox(height: 12),
           if (!_isSubmitted)
             FilledButton(
@@ -118,27 +189,7 @@ class _ExerciseExecutionScreenState
               child: const Text('Valider la reponse'),
             ),
           if (_isSubmitted) ...<Widget>[
-            Card(
-              color: _isCorrect
-                  ? Colors.green.withOpacity(0.12)
-                  : Colors.red.withOpacity(0.12),
-              child: Padding(
-                padding: const EdgeInsets.all(12),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: <Widget>[
-                    Text(
-                      _isCorrect ? 'Bonne reponse !' : 'Mauvaise reponse.',
-                      style: Theme.of(context).textTheme.titleMedium,
-                    ),
-                    if (!_isCorrect) ...<Widget>[
-                      const SizedBox(height: 6),
-                      Text('Bonne reponse: ${exercise.correctAnswer}'),
-                    ],
-                  ],
-                ),
-              ),
-            ),
+            _buildResultCard(exercise),
             const SizedBox(height: 8),
             Row(
               children: <Widget>[
