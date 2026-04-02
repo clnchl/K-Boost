@@ -23,9 +23,8 @@ class _HangulLearningScreenState extends ConsumerState<HangulLearningScreen> {
     ),
     _StructureLessonPage(
       title: 'Structure de base',
-      content:
-          'Une syllabe suit généralement : Consonne + Voyelle (+ Consonne finale optionnelle).',
-      examples: <String>['가 = ㄱ + ㅏ → ga', '한 = ㅎ + ㅏ + ㄴ → han'],
+      content: 'Dans ce premier module, une syllabe suit : Consonne + Voyelle.',
+      examples: <String>['가 = ㄱ + ㅏ → ga', '나 = ㄴ + ㅏ → na'],
     ),
     _StructureLessonPage(
       title: 'Consonne initiale',
@@ -43,20 +42,12 @@ class _HangulLearningScreenState extends ConsumerState<HangulLearningScreen> {
       ],
     ),
     _StructureLessonPage(
-      title: 'Consonne finale (batchim)',
-      content: 'La consonne finale est optionnelle et se place en bas du bloc.',
-      examples: <String>[
-        'Sans batchim : CV → 가, 나, 다',
-        'Avec batchim : CVC → 간, 닭, 값',
-      ],
-    ),
-    _StructureLessonPage(
       title: 'Exemple complet',
-      content: '한글 se découpe en 2 blocs syllabiques.',
+      content: 'Voici deux blocs simples sans consonne finale.',
       examples: <String>[
-        '한 = ㅎ + ㅏ + ㄴ',
-        '글 = ㄱ + ㅡ + ㄹ',
-        'Résumé : 1 consonne + 1 voyelle (+ parfois 1 finale) = 1 bloc',
+        '가 = ㄱ + ㅏ',
+        '고 = ㄱ + ㅗ',
+        'Résumé : 1 consonne + 1 voyelle = 1 bloc',
       ],
     ),
   ];
