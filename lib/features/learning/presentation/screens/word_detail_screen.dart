@@ -28,6 +28,82 @@ class _WordDetailScreenState extends ConsumerState<WordDetailScreen> {
 
   static const Color _koreaBlue = Color(0xFF0C4A8A);
   static const Color _koreaRed = Color(0xFFC51F3A);
+  static const Set<String> _hangulInitialOnlyConsonants = <String>{
+    'ㄸ',
+    'ㅃ',
+    'ㅉ',
+  };
+  static const Map<String, String> _hangulInitialSounds = <String, String>{
+    'ㄱ': 'g/k',
+    'ㄲ': 'kk',
+    'ㄴ': 'n',
+    'ㄷ': 'd/t',
+    'ㄸ': 'tt',
+    'ㄹ': 'r/l',
+    'ㅁ': 'm',
+    'ㅂ': 'b/p',
+    'ㅃ': 'pp',
+    'ㅅ': 's',
+    'ㅆ': 'ss',
+    'ㅇ': 'muet',
+    'ㅈ': 'j',
+    'ㅉ': 'jj',
+    'ㅊ': 'ch',
+    'ㅋ': 'k',
+    'ㅌ': 't',
+    'ㅍ': 'p',
+    'ㅎ': 'h',
+  };
+  static const Map<String, String> _hangulFinalSounds = <String, String>{
+    'ㄱ': 'k',
+    'ㄲ': 'k',
+    'ㄴ': 'n',
+    'ㄷ': 't',
+    'ㄹ': 'l',
+    'ㅁ': 'm',
+    'ㅂ': 'p',
+    'ㅅ': 't',
+    'ㅆ': 't',
+    'ㅇ': 'ng',
+    'ㅈ': 't',
+    'ㅊ': 't',
+    'ㅋ': 'k',
+    'ㅌ': 't',
+    'ㅍ': 'p',
+    'ㅎ': 't',
+  };
+  static const Map<String, String> _hangulVowelSounds = <String, String>{
+    'ㅏ': 'a',
+    'ㅐ': 'ae',
+    'ㅑ': 'ya',
+    'ㅒ': 'yae',
+    'ㅓ': 'eo',
+    'ㅔ': 'e',
+    'ㅕ': 'yeo',
+    'ㅖ': 'ye',
+    'ㅗ': 'o',
+    'ㅘ': 'wa',
+    'ㅙ': 'wae',
+    'ㅚ': 'oe/we',
+    'ㅛ': 'yo',
+    'ㅜ': 'u',
+    'ㅝ': 'wo',
+    'ㅞ': 'we',
+    'ㅟ': 'wi',
+    'ㅠ': 'yu',
+    'ㅡ': 'eu',
+    'ㅢ': 'ui',
+    'ㅣ': 'i',
+  };
+  static const Map<String, String> _hangulNotes = <String, String>{
+    'ㅇ': 'Muet en debut de syllabe, prononce ng en fin.',
+    'ㄹ': 'Le son varie entre r en debut et l en fin.',
+    'ㅎ': 'En fin de syllabe, le son peut s\'affaiblir selon la liaison.',
+    'ㅅ': 'En fin de syllabe, le son se realise souvent comme t.',
+    'ㅆ': 'En fin de syllabe, le son se realise souvent comme t.',
+    'ㅈ': 'En fin de syllabe, le son se realise souvent comme t.',
+    'ㅊ': 'En fin de syllabe, le son se realise souvent comme t.',
+  };
 
   @override
   Widget build(BuildContext context) {
@@ -57,6 +133,11 @@ class _WordDetailScreenState extends ConsumerState<WordDetailScreen> {
             );
           }
 
+          final bool isHangul = _isHangulWord(word);
+          final bool showConjugationSections = _shouldShowConjugationSections(
+            word,
+          );
+
           return _buildPopupShell(
             child: Stack(
               children: <Widget>[
@@ -81,41 +162,53 @@ class _WordDetailScreenState extends ConsumerState<WordDetailScreen> {
                                 color: _koreaBlue,
                               ),
                               const SizedBox(height: 22),
-                              _SectionTitle(
-                                title: LearningUiText.detailSectionParticles,
-                              ),
-                              const SizedBox(height: 10),
-                              Wrap(
-                                spacing: 8,
-                                runSpacing: 8,
-                                children: _particlesFromWord(word.particle)
-                                    .map(
-                                      (String particle) => _buildParticlePill(
-                                        context,
-                                        particle,
-                                        _resolveParticleInfo(
+                              if (isHangul) ...<Widget>[
+                                _SectionTitle(
+                                  title: LearningUiText.detailSectionHangul,
+                                ),
+                                const SizedBox(height: 10),
+                                _buildHangulDetailsCard(context, word),
+                                const SizedBox(height: 22),
+                              ] else ...<Widget>[
+                                _SectionTitle(
+                                  title: LearningUiText.detailSectionParticles,
+                                ),
+                                const SizedBox(height: 10),
+                                Wrap(
+                                  spacing: 8,
+                                  runSpacing: 8,
+                                  children: _particlesFromWord(word.particle)
+                                      .map(
+                                        (String particle) => _buildParticlePill(
+                                          context,
                                           particle,
-                                          particleInfoByForm,
+                                          _resolveParticleInfo(
+                                            particle,
+                                            particleInfoByForm,
+                                          ),
                                         ),
-                                      ),
-                                    )
-                                    .toList(),
-                              ),
-                              const SizedBox(height: 22),
-                              _SectionTitle(
-                                title: LearningUiText.detailSectionTense,
-                              ),
-                              const SizedBox(height: 10),
-                              _buildTenseSelector(context),
-                              const SizedBox(height: 16),
-                              _SectionTitle(
-                                title: LearningUiText.detailSectionPoliteness,
-                              ),
-                              const SizedBox(height: 10),
-                              _buildPolitenessLevelSelector(context),
-                              const SizedBox(height: 10),
-                              _buildPolitenessCard(context, word),
-                              const SizedBox(height: 22),
+                                      )
+                                      .toList(),
+                                ),
+                                const SizedBox(height: 22),
+                                if (showConjugationSections) ...<Widget>[
+                                  _SectionTitle(
+                                    title: LearningUiText.detailSectionTense,
+                                  ),
+                                  const SizedBox(height: 10),
+                                  _buildTenseSelector(context),
+                                  const SizedBox(height: 16),
+                                  _SectionTitle(
+                                    title:
+                                        LearningUiText.detailSectionPoliteness,
+                                  ),
+                                  const SizedBox(height: 10),
+                                  _buildPolitenessLevelSelector(context),
+                                  const SizedBox(height: 10),
+                                  _buildPolitenessCard(context, word),
+                                  const SizedBox(height: 22),
+                                ],
+                              ],
                               _SectionTitle(
                                 title: LearningUiText.detailSectionDefinition,
                               ),
@@ -474,6 +567,158 @@ class _WordDetailScreenState extends ConsumerState<WordDetailScreen> {
         ),
       ),
     );
+  }
+
+  bool _isHangulWord(WordEntity word) {
+    return word.theme == 'hangul';
+  }
+
+  bool _shouldShowConjugationSections(WordEntity word) {
+    return _isVerbWord(word) && _hasConjugationVariation(word);
+  }
+
+  bool _isVerbWord(WordEntity word) {
+    final String normalized = word.word.trim();
+    return word.category == 'action' && normalized.endsWith('다');
+  }
+
+  bool _hasConjugationVariation(WordEntity word) {
+    final Set<String> forms = <String>{};
+
+    for (final Map<PolitenessLevel, String> byLevel
+        in word.politenessByTense.values) {
+      for (final String value in byLevel.values) {
+        final String normalized = value.trim();
+        if (normalized.isNotEmpty) {
+          forms.add(normalized);
+        }
+      }
+    }
+
+    return forms.length > 1;
+  }
+
+  Widget _buildHangulDetailsCard(BuildContext context, WordEntity word) {
+    final String symbol = word.word.trim();
+    final bool isConsonant = _hangulInitialSounds.containsKey(symbol);
+    final bool isVowel = _hangulVowelSounds.containsKey(symbol);
+
+    if (!isConsonant && !isVowel) {
+      return Container(
+        width: double.infinity,
+        padding: const EdgeInsets.all(14),
+        decoration: BoxDecoration(
+          color: Colors.white,
+          borderRadius: BorderRadius.circular(16),
+          border: Border.all(color: Colors.blueGrey.withOpacity(0.12)),
+        ),
+        child: Text(
+          LearningUiText.detailHangulUnknown,
+          style: Theme.of(
+            context,
+          ).textTheme.bodyLarge?.copyWith(color: Colors.blueGrey.shade800),
+        ),
+      );
+    }
+
+    final String typeLabel = isConsonant ? 'Consonne (자음)' : 'Voyelle (모음)';
+    final String positionLabel = _hangulPositionLabel(
+      symbol,
+      isConsonant: isConsonant,
+    );
+    final List<Widget> infoRows = <Widget>[
+      _HangulInfoRow(label: LearningUiText.detailHangulType, value: typeLabel),
+      _HangulInfoRow(
+        label: LearningUiText.detailHangulPosition,
+        value: positionLabel,
+      ),
+    ];
+
+    if (isConsonant) {
+      infoRows.add(
+        _HangulInfoRow(
+          label: LearningUiText.detailHangulInitialSound,
+          value: _hangulInitialSounds[symbol]!,
+        ),
+      );
+
+      if (_hangulInitialOnlyConsonants.contains(symbol)) {
+        infoRows.add(
+          const _HangulInfoRow(
+            label: LearningUiText.detailHangulFinalSound,
+            value: 'Non utilise en fin de syllabe.',
+          ),
+        );
+      } else {
+        final String? finalSound = _hangulFinalSounds[symbol];
+        if (finalSound != null) {
+          infoRows.add(
+            _HangulInfoRow(
+              label: LearningUiText.detailHangulFinalSound,
+              value: finalSound,
+            ),
+          );
+        }
+      }
+    }
+
+    if (isVowel) {
+      final String? medialSound = _hangulVowelSounds[symbol];
+      if (medialSound != null) {
+        infoRows.add(
+          _HangulInfoRow(
+            label: LearningUiText.detailHangulMedialSound,
+            value: medialSound,
+          ),
+        );
+      }
+    }
+
+    final String? note = _hangulNotes[symbol];
+    if (note != null) {
+      infoRows.add(
+        _HangulInfoRow(label: LearningUiText.detailHangulNote, value: note),
+      );
+    }
+
+    infoRows.add(
+      _HangulInfoRow(label: 'Romanisation', value: word.romanization),
+    );
+
+    return Container(
+      width: double.infinity,
+      padding: const EdgeInsets.all(14),
+      decoration: BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(16),
+        border: Border.all(color: Colors.blueGrey.withOpacity(0.12)),
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: <Widget>[
+          for (int i = 0; i < infoRows.length; i++) ...<Widget>[
+            if (i > 0) const SizedBox(height: 10),
+            infoRows[i],
+          ],
+        ],
+      ),
+    );
+  }
+
+  String _hangulPositionLabel(String symbol, {required bool isConsonant}) {
+    if (!isConsonant) {
+      return 'Milieu de syllabe (중성).';
+    }
+
+    if (symbol == 'ㅇ') {
+      return 'Debut de syllabe (초성) et fin de syllabe (종성/받침).';
+    }
+
+    if (_hangulInitialOnlyConsonants.contains(symbol)) {
+      return 'Debut de syllabe uniquement (초성).';
+    }
+
+    return 'Debut (초성) et fin (종성/받침) de syllabe.';
   }
 
   List<String> _particlesFromWord(String? particle) {
@@ -914,6 +1159,37 @@ class _SectionTitle extends StatelessWidget {
         fontWeight: FontWeight.w700,
         color: Colors.blueGrey.shade800,
       ),
+    );
+  }
+}
+
+class _HangulInfoRow extends StatelessWidget {
+  const _HangulInfoRow({required this.label, required this.value});
+
+  final String label;
+  final String value;
+
+  @override
+  Widget build(BuildContext context) {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: <Widget>[
+        Text(
+          label,
+          style: Theme.of(context).textTheme.labelLarge?.copyWith(
+            color: Colors.blueGrey.shade700,
+            fontWeight: FontWeight.w700,
+          ),
+        ),
+        const SizedBox(height: 2),
+        Text(
+          value,
+          style: Theme.of(context).textTheme.bodyLarge?.copyWith(
+            color: Colors.blueGrey.shade900,
+            height: 1.3,
+          ),
+        ),
+      ],
     );
   }
 }

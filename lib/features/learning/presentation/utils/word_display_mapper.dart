@@ -25,6 +25,8 @@ class WordDisplayMapper {
         return 'Lieu';
       case 'time':
         return 'Temps';
+      case 'symbol':
+        return 'Symbole';
       default:
         return category;
     }
@@ -42,6 +44,8 @@ class WordDisplayMapper {
         return const Color(0xFF2563EB);
       case 'time':
         return const Color(0xFF1D4ED8);
+      case 'symbol':
+        return const Color(0xFF0F766E);
       default:
         return const Color(0xFF334155);
     }
@@ -66,6 +70,85 @@ class WordDisplayMapper {
         return const Color(0xFF6D28D9);
       default:
         return koreaBlue;
+    }
+  }
+
+  static String themeLabel(String theme, {String allThemeKey = 'all'}) {
+    if (theme == allThemeKey) {
+      return 'Tous';
+    }
+
+    switch (theme) {
+      case 'education':
+        return 'Education';
+      case 'restaurant':
+        return 'Restaurant';
+      case 'transport':
+        return 'Transport';
+      case 'social':
+        return 'Social';
+      case 'family':
+        return 'Famille';
+      case 'hangul':
+        return 'Hangul';
+      case 'culture':
+        return 'Culture';
+      case 'daily_life':
+        return 'Quotidien';
+      default:
+        return theme;
+    }
+  }
+
+  static Color themeFilterAccentColor(
+    String theme, {
+    String allThemeKey = 'all',
+  }) {
+    if (theme == allThemeKey) {
+      return koreaBlue;
+    }
+
+    switch (theme) {
+      case 'education':
+        return const Color(0xFF1D4ED8);
+      case 'restaurant':
+        return koreaRed;
+      case 'transport':
+        return const Color(0xFF0F766E);
+      case 'social':
+        return const Color(0xFF7A4D94);
+      case 'family':
+        return const Color(0xFFBE185D);
+      case 'hangul':
+        return const Color(0xFF0F766E);
+      case 'culture':
+        return const Color(0xFF9A3412);
+      case 'daily_life':
+        return const Color(0xFF0F766E);
+      default:
+        return koreaBlue;
+    }
+  }
+
+  static String subThemeLabel(
+    String subTheme, {
+    String allSubThemeKey = 'all',
+  }) {
+    if (subTheme == allSubThemeKey) {
+      return 'Tous sous-themes';
+    }
+
+    switch (subTheme) {
+      case 'family_core':
+        return 'Noyau familial';
+      case 'family_extended':
+        return 'Famille elargie';
+      case 'hangul_consonants':
+        return 'Consonnes';
+      case 'hangul_vowels':
+        return 'Voyelles';
+      default:
+        return subTheme;
     }
   }
 

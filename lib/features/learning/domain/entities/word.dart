@@ -54,6 +54,8 @@ class WordEntity {
     required this.translation,
     required this.romanization,
     required this.category,
+    this.theme = 'general',
+    this.subTheme = 'general',
     this.particle,
     required this.definition,
     required this.difficulty,
@@ -67,6 +69,8 @@ class WordEntity {
   final String translation;
   final String romanization;
   final String category;
+  final String theme;
+  final String subTheme;
   final String? particle;
   final String definition;
   final int difficulty;

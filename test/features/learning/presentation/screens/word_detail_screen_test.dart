@@ -138,6 +138,90 @@ void main() {
     });
 
     testWidgets(
+      'hides tense and politeness for non-verb words but keeps particles',
+      (WidgetTester tester) async {
+        final GetWordExamplesUseCase useCase = GetWordExamplesUseCase(
+          FakeExampleSentenceRepository(),
+        );
+        final GetWordByIdUseCase wordByIdUseCase = GetWordByIdUseCase(
+          FakeWordRepository(
+            initialWords: <WordEntity>[
+              sampleWord(
+                id: 'w1',
+                word: '사람',
+                category: 'subject',
+                particle: '은/는',
+              ),
+            ],
+          ),
+        );
+
+        await tester.pumpWidget(
+          buildTestApp(
+            examplesUseCase: useCase,
+            wordByIdUseCase: wordByIdUseCase,
+          ),
+        );
+        await tester.pump();
+        await tester.pump();
+
+        expect(find.text('Particules'), findsOneWidget);
+        expect(find.text('은/는'), findsOneWidget);
+        expect(find.text('Temps'), findsNothing);
+        expect(find.text('Niveau de politesse'), findsNothing);
+      },
+    );
+
+    testWidgets('shows Hangul details and hides irrelevant grammar sections', (
+      WidgetTester tester,
+    ) async {
+      final GetWordExamplesUseCase useCase = GetWordExamplesUseCase(
+        FakeExampleSentenceRepository(),
+      );
+      final GetWordByIdUseCase wordByIdUseCase = GetWordByIdUseCase(
+        FakeWordRepository(
+          initialWords: <WordEntity>[
+            sampleWord(
+              id: 'w1',
+              word: 'ㄱ',
+              translation: 'consonne giyeok',
+              romanization: 'giyeok',
+              category: 'symbol',
+              theme: 'hangul',
+              subTheme: 'hangul_consonants',
+              particle: null,
+              definition: 'Lettre consonne de l\'alphabet hangul.',
+            ),
+          ],
+        ),
+      );
+
+      await tester.pumpWidget(
+        buildTestApp(
+          examplesUseCase: useCase,
+          wordByIdUseCase: wordByIdUseCase,
+        ),
+      );
+      await tester.pump();
+      await tester.pump();
+
+      expect(find.text('Details hangul'), findsOneWidget);
+      expect(find.text('Particules'), findsNothing);
+      expect(find.text('Temps'), findsNothing);
+      expect(find.text('Niveau de politesse'), findsNothing);
+
+      expect(find.text('Position dans la syllabe'), findsOneWidget);
+      expect(
+        find.text('Debut (초성) et fin (종성/받침) de syllabe.'),
+        findsOneWidget,
+      );
+      expect(find.text('Son en debut (초성)'), findsOneWidget);
+      expect(find.text('g/k'), findsOneWidget);
+      expect(find.text('Son en fin (종성/받침)'), findsOneWidget);
+      expect(find.text('k'), findsOneWidget);
+    });
+
+    testWidgets(
       'switches between informelle, poli, formelle and keeps tense context',
       (WidgetTester tester) async {
         final FakeExampleSentenceRepository repository =
@@ -154,6 +238,8 @@ void main() {
             initialWords: <WordEntity>[
               sampleWord(
                 id: 'w1',
+                word: '먹다',
+                category: 'action',
                 politenessByTense:
                     const <WordTense, Map<PolitenessLevel, String>>{
                       WordTense.present: <PolitenessLevel, String>{

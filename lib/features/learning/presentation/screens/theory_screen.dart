@@ -16,13 +16,15 @@ class TheoryScreen extends ConsumerStatefulWidget {
 }
 
 class _TheoryScreenState extends ConsumerState<TheoryScreen> {
-  static const String _allCategory = 'all';
+  static const String _allTheme = 'all';
+  static const String _allSubTheme = 'all';
   static const Color _koreaBlue = WordDisplayMapper.koreaBlue;
   static const Color _koreaRed = WordDisplayMapper.koreaRed;
 
   late final TextEditingController _searchController;
   String _searchQuery = '';
-  String _selectedCategory = _allCategory;
+  String _selectedTheme = _allTheme;
+  String _selectedSubTheme = _allSubTheme;
 
   @override
   void initState() {
@@ -47,19 +49,24 @@ class _TheoryScreenState extends ConsumerState<TheoryScreen> {
       backgroundColor: const Color(0xFFF5F7FB),
       body: wordsState.when(
         data: (List<WordEntity> words) {
-          final List<String> sortedCategories = <String>{
-            ...words.map((WordEntity word) => word.category),
+          final List<String> sortedThemes = <String>{
+            ...words.map((WordEntity word) => word.theme),
           }.toList()..sort();
 
-          final List<String> categories = <String>[
-            _allCategory,
-            ...sortedCategories,
-          ];
+          final List<String> themes = <String>[_allTheme, ...sortedThemes];
+          final List<String> sortedSubThemes = _sortedSubThemesForSelectedTheme(
+            words,
+          );
+          final List<String> subThemes = sortedSubThemes.isEmpty
+              ? <String>[]
+              : <String>[_allSubTheme, ...sortedSubThemes];
 
           final List<WordEntity> filteredWords = words
               .where(
                 (WordEntity word) =>
-                    _matchesCategory(word) && _matchesSearch(word),
+                    _matchesTheme(word) &&
+                    _matchesSubTheme(word) &&
+                    _matchesSearch(word),
               )
               .toList();
 
@@ -111,7 +118,11 @@ class _TheoryScreenState extends ConsumerState<TheoryScreen> {
                 Column(
                   children: <Widget>[
                     _buildTopHeader(context),
-                    _buildCategoryFilters(context, categories),
+                    _buildThemeFilters(context, themes),
+                    if (subThemes.isNotEmpty) ...<Widget>[
+                      const SizedBox(height: 8),
+                      _buildSubThemeFilters(context, subThemes),
+                    ],
                     Padding(
                       padding: const EdgeInsets.fromLTRB(16, 8, 16, 8),
                       child: Row(
@@ -127,7 +138,7 @@ class _TheoryScreenState extends ConsumerState<TheoryScreen> {
                             child: Text(
                               '${filteredWords.length}',
                               key: ValueKey<String>(
-                                '${filteredWords.length}-$_selectedCategory-$_searchQuery',
+                                '${filteredWords.length}-$_selectedTheme-$_searchQuery',
                               ),
                               style: Theme.of(context).textTheme.titleLarge
                                   ?.copyWith(
@@ -150,7 +161,7 @@ class _TheoryScreenState extends ConsumerState<TheoryScreen> {
                                     .loadWords(),
                                 child: ListView.separated(
                                   key: ValueKey<String>(
-                                    'list-$_selectedCategory-$_searchQuery',
+                                    'list-$_selectedTheme-$_searchQuery',
                                   ),
                                   padding: const EdgeInsets.fromLTRB(
                                     16,
@@ -383,20 +394,20 @@ class _TheoryScreenState extends ConsumerState<TheoryScreen> {
     );
   }
 
-  Widget _buildCategoryFilters(BuildContext context, List<String> categories) {
+  Widget _buildThemeFilters(BuildContext context, List<String> themes) {
     return SizedBox(
       height: 42,
       child: ListView.separated(
         padding: const EdgeInsets.symmetric(horizontal: 16),
         scrollDirection: Axis.horizontal,
-        itemCount: categories.length,
+        itemCount: themes.length,
         separatorBuilder: (_, __) => const SizedBox(width: 8),
         itemBuilder: (BuildContext context, int index) {
-          final String category = categories[index];
-          final bool isSelected = category == _selectedCategory;
-          final Color accentColor = WordDisplayMapper.categoryFilterAccentColor(
-            category,
-            allCategoryKey: _allCategory,
+          final String theme = themes[index];
+          final bool isSelected = theme == _selectedTheme;
+          final Color accentColor = WordDisplayMapper.themeFilterAccentColor(
+            theme,
+            allThemeKey: _allTheme,
           );
 
           return ChoiceChip(
@@ -409,15 +420,60 @@ class _TheoryScreenState extends ConsumerState<TheoryScreen> {
               ),
             ),
             label: Text(
-              WordDisplayMapper.categoryLabel(
-                category,
-                allCategoryKey: _allCategory,
+              WordDisplayMapper.themeLabel(theme, allThemeKey: _allTheme),
+            ),
+            selected: isSelected,
+            onSelected: (_) {
+              setState(() {
+                _selectedTheme = theme;
+                _selectedSubTheme = _allSubTheme;
+              });
+            },
+            selectedColor: accentColor.withOpacity(0.16),
+            backgroundColor: Colors.white.withOpacity(0.92),
+            labelStyle: Theme.of(context).textTheme.labelLarge?.copyWith(
+              color: isSelected ? accentColor : Colors.blueGrey.shade700,
+              fontWeight: FontWeight.w700,
+            ),
+            side: BorderSide(
+              color: isSelected
+                  ? accentColor.withOpacity(0.62)
+                  : accentColor.withOpacity(0.22),
+            ),
+          );
+        },
+      ),
+    );
+  }
+
+  Widget _buildSubThemeFilters(BuildContext context, List<String> subThemes) {
+    final Color accentColor = WordDisplayMapper.themeFilterAccentColor(
+      _selectedTheme,
+      allThemeKey: _allTheme,
+    );
+
+    return SizedBox(
+      height: 42,
+      child: ListView.separated(
+        padding: const EdgeInsets.symmetric(horizontal: 16),
+        scrollDirection: Axis.horizontal,
+        itemCount: subThemes.length,
+        separatorBuilder: (_, __) => const SizedBox(width: 8),
+        itemBuilder: (BuildContext context, int index) {
+          final String subTheme = subThemes[index];
+          final bool isSelected = subTheme == _selectedSubTheme;
+
+          return ChoiceChip(
+            label: Text(
+              WordDisplayMapper.subThemeLabel(
+                subTheme,
+                allSubThemeKey: _allSubTheme,
               ),
             ),
             selected: isSelected,
             onSelected: (_) {
               setState(() {
-                _selectedCategory = category;
+                _selectedSubTheme = subTheme;
               });
             },
             selectedColor: accentColor.withOpacity(0.16),
@@ -469,11 +525,38 @@ class _TheoryScreenState extends ConsumerState<TheoryScreen> {
     );
   }
 
-  bool _matchesCategory(WordEntity word) {
-    if (_selectedCategory == _allCategory) {
+  bool _matchesTheme(WordEntity word) {
+    if (_selectedTheme == _allTheme) {
       return true;
     }
-    return word.category == _selectedCategory;
+    return word.theme == _selectedTheme;
+  }
+
+  bool _matchesSubTheme(WordEntity word) {
+    if (_selectedTheme == _allTheme || _selectedSubTheme == _allSubTheme) {
+      return true;
+    }
+    return word.subTheme == _selectedSubTheme;
+  }
+
+  List<String> _sortedSubThemesForSelectedTheme(List<WordEntity> words) {
+    if (_selectedTheme == _allTheme) {
+      return <String>[];
+    }
+
+    final List<String> subThemes =
+        <String>{
+              ...words
+                  .where((WordEntity word) => word.theme == _selectedTheme)
+                  .map((WordEntity word) => word.subTheme),
+            }
+            .where(
+              (String subTheme) => subTheme.isNotEmpty && subTheme != 'general',
+            )
+            .toList()
+          ..sort();
+
+    return subThemes;
   }
 
   bool _matchesSearch(WordEntity word) {
@@ -487,6 +570,8 @@ class _TheoryScreenState extends ConsumerState<TheoryScreen> {
       word.translation,
       word.romanization,
       word.definition,
+      word.theme,
+      word.subTheme,
       word.category,
     ].join(' ').toLowerCase();
 

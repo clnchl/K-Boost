@@ -23,8 +23,17 @@ class LearningUiText {
   static const String detailSectionParticles = 'Particules';
   static const String detailSectionTense = 'Temps';
   static const String detailSectionPoliteness = 'Niveau de politesse';
+  static const String detailSectionHangul = 'Details hangul';
   static const String detailSectionDefinition = 'Definition';
   static const String detailSectionExamples = 'Exemples';
+  static const String detailHangulType = 'Type';
+  static const String detailHangulPosition = 'Position dans la syllabe';
+  static const String detailHangulInitialSound = 'Son en debut (초성)';
+  static const String detailHangulMedialSound = 'Son en milieu (중성)';
+  static const String detailHangulFinalSound = 'Son en fin (종성/받침)';
+  static const String detailHangulNote = 'Note';
+  static const String detailHangulUnknown =
+      'Details hangul indisponibles pour ce symbole.';
   static const String detailNoExamples = 'Aucun exemple disponible.';
   static const String detailExamplesLoadError =
       'Impossible de charger les exemples.';
