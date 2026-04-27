@@ -1,10 +1,7 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_riverpod/flutter_riverpod.dart';
-
-import 'features/learning/presentation/screens/learning_screen.dart';
 
 void main() {
-  runApp(const ProviderScope(child: KBoostApp()));
+  runApp(const KBoostApp());
 }
 
 class KBoostApp extends StatelessWidget {
@@ -19,7 +16,7 @@ class KBoostApp extends StatelessWidget {
         colorScheme: ColorScheme.fromSeed(seedColor: const Color(0xFF2E7D32)),
         useMaterial3: true,
       ),
-      home: const LearningScreen(),
+      home: const Scaffold(backgroundColor: Colors.white),
     );
   }
 }
