@@ -1,3 +1,4 @@
+import 'package:flutter/foundation.dart' show kIsWeb, defaultTargetPlatform, TargetPlatform;
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../domain/entities/category.dart';
 import '../../domain/entities/word.dart';
@@ -6,11 +7,28 @@ import '../../domain/repositories/theory_repository.dart';
 import '../../domain/usecases/get_categories_usecase.dart';
 import '../../domain/usecases/get_words_by_category_usecase.dart';
 import '../../domain/usecases/get_word_detail_usecase.dart';
+import '../../data/datasources/theory_remote_datasource.dart';
+import '../../data/datasources/theory_remote_datasource_impl.dart';
 import '../../data/repositories/theory_repository_impl.dart';
+
+String _resolveBaseUrl() {
+  if (kIsWeb) {
+    return 'http://localhost:3000';
+  }
+  if (defaultTargetPlatform == TargetPlatform.android) {
+    return 'http://10.0.2.2:3000';
+  }
+  return 'http://127.0.0.1:3000';
+}
+
+final theoryRemoteDataSourceProvider = Provider<TheoryRemoteDataSource>((ref) {
+  return TheoryRemoteDataSourceImpl(baseUrl: _resolveBaseUrl());
+});
 
 // Repository - créé une seule fois
 final theoryRepositoryProvider = Provider<TheoryRepository>((ref) {
-  return TheoryRepositoryImpl();
+  final remote = ref.watch(theoryRemoteDataSourceProvider);
+  return TheoryRepositoryImpl(remote);
 });
 
 // Provider du UseCase
@@ -27,7 +45,7 @@ final categoriesProvider = FutureProvider<List<Category>>((ref) async {
 
 // Catégorie actuellement sélectionnée (par défaut: "Tous les mots")
 final selectedCategoryProvider = StateProvider<String?>((ref) {
-  return '0'; // 
+  return '0';
 });
 
 // Charge les mots de la catégorie actuellement sélectionnée
@@ -51,7 +69,7 @@ final getWordsByCategoryUseCaseProvider = Provider<GetWordsByCategoryUseCase>((
   return GetWordsByCategoryUseCase(repository);
 });
 
-// 🆕 Provider du UseCase pour récupérer détail
+// Provider du UseCase pour récupérer détail
 final getWordDetailUseCaseProvider = Provider<GetWordDetailUseCase>((ref) {
   final repository = ref.watch(theoryRepositoryProvider);
   return GetWordDetailUseCase(repository);

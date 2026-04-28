@@ -1,22 +1,98 @@
 [
   {
-    "id": "w1",
-    "korean": "annyeong",
-    "translation": "hello",
-    "definition": "casual greeting",
-    "example": "annyeong!"
+    "id": "1",
+    "korean": "나",
+    "romanisation": "na",
+    "translation": "Je/Moi",
+    "grammaticalType": "Pronom",
+    "exampleSentence": "나는 학생입니다 (na-neun haksaeng-imnida) - Je suis un étudiant"
   },
   {
-    "id": "w2",
-    "korean": "gamsa",
-    "translation": "thanks",
-    "definition": "gratitude",
-    "example": "gamsa!"
+    "id": "2",
+    "korean": "너",
+    "romanisation": "neo",
+    "translation": "Tu/Toi",
+    "grammaticalType": "Pronom",
+    "exampleSentence": "너는 누구니? (neoneun nuguní?) - Qui es-tu?"
   },
   {
-    "id": "w3",
-    "korean": "bap",
-    "translation": "rice",
-    "definition": "cooked rice"
+    "id": "4",
+    "korean": "먹다",
+    "romanisation": "meokda",
+    "translation": "Manger",
+    "grammaticalType": "Verbe",
+    "exampleSentence": "나는 밥을 먹습니다 (na-neun bab-eul meok-sseumnida) - Je mange du riz"
+  },
+  {
+    "id": "5",
+    "korean": "가다",
+    "romanisation": "gada",
+    "translation": "Aller",
+    "grammaticalType": "Verbe",
+    "exampleSentence": "학교에 가요 (hakgyo-e gayo) - Je vais à l'école"
+  },
+  {
+    "id": "7",
+    "korean": "크다",
+    "romanisation": "keuda",
+    "translation": "Grand",
+    "grammaticalType": "Adjectif",
+    "exampleSentence": "이 집은 크다 (i jib-eun keuda) - Cette maison est grande"
+  },
+  {
+    "id": "8",
+    "korean": "작다",
+    "romanisation": "jakda",
+    "translation": "Petit",
+    "grammaticalType": "Adjectif",
+    "exampleSentence": "그 고양이는 작다 (geu goyang-i-neun jakda) - Ce chat est petit"
+  },
+  {
+    "id": "15",
+    "korean": "은/는",
+    "romanisation": "eun/neun",
+    "translation": "Particule de sujet",
+    "grammaticalType": "Particule",
+    "exampleSentence": "나는 학생입니다 (na-neun haksaeng-imnida) - Je suis un étudiant"
+  },
+  {
+    "id": "16",
+    "korean": "을/를",
+    "romanisation": "eul/reul",
+    "translation": "Particule d'objet",
+    "grammaticalType": "Particule",
+    "exampleSentence": "밥을 먹습니다 (bab-eul meok-sseumnida) - Manger du riz"
+  },
+  {
+    "id": "18",
+    "korean": "하나",
+    "romanisation": "hana",
+    "translation": "Un",
+    "grammaticalType": "Nombre",
+    "exampleSentence": "하나, 둘, 셋 (hana, dul, set) - Un, deux, trois"
+  },
+  {
+    "id": "19",
+    "korean": "둘",
+    "romanisation": "dul",
+    "translation": "Deux",
+    "grammaticalType": "Nombre",
+    "exampleSentence": "그들은 둘입니다 (geudel-eun dul-imnida) - Ils sont deux"
+  },
+  {
+    "id": "23",
+    "korean": "아버지",
+    "romanisation": "abeoji",
+    "translation": "Père",
+    "grammaticalType": "Nom",
+    "exampleSentence": "내 아버지는 의사입니다 (nae abeoji-neun uisa-imnida) - Mon père est médecin"
+  },
+  {
+    "id": "24",
+    "korean": "어머니",
+    "romanisation": "eomeoni",
+    "translation": "Mère",
+    "grammaticalType": "Nom",
+    "exampleSentence": "어머니는 선생님입니다 (eomeoni-neun seongsaengnim-imnida) - Ma mère est professeur"
   }
 ]

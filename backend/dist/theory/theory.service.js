@@ -27,6 +27,9 @@ let TheoryService = class TheoryService {
         return this.categories;
     }
     getWordsByCategory(categoryId) {
+        if (categoryId == '0') {
+            return this.words;
+        }
         return this.words.filter((word) => word.categoryId === categoryId);
     }
     getWordDetail(wordId) {

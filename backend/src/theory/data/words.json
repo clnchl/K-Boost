@@ -1,5 +1,14 @@
 [
-  { "id": "w1", "korean": "annyeong", "translation": "hello", "categoryId": "basics" },
-  { "id": "w2", "korean": "gamsa", "translation": "thanks", "categoryId": "basics" },
-  { "id": "w3", "korean": "bap", "translation": "rice", "categoryId": "food" }
+  { "id": "1", "korean": "나", "romanisation": "na", "translation": "Je/Moi", "categoryId": "1" },
+  { "id": "2", "korean": "너", "romanisation": "neo", "translation": "Tu/Toi", "categoryId": "1" },
+  { "id": "4", "korean": "먹다", "romanisation": "meokda", "translation": "Manger", "categoryId": "2" },
+  { "id": "5", "korean": "가다", "romanisation": "gada", "translation": "Aller", "categoryId": "2" },
+  { "id": "7", "korean": "크다", "romanisation": "keuda", "translation": "Grand", "categoryId": "3" },
+  { "id": "8", "korean": "작다", "romanisation": "jakda", "translation": "Petit", "categoryId": "3" },
+  { "id": "15", "korean": "은/는", "romanisation": "eun/neun", "translation": "Particule de sujet", "categoryId": "4" },
+  { "id": "16", "korean": "을/를", "romanisation": "eul/reul", "translation": "Particule d'objet", "categoryId": "4" },
+  { "id": "18", "korean": "하나", "romanisation": "hana", "translation": "Un", "categoryId": "5" },
+  { "id": "19", "korean": "둘", "romanisation": "dul", "translation": "Deux", "categoryId": "5" },
+  { "id": "23", "korean": "아버지", "romanisation": "abeoji", "translation": "Père", "categoryId": "6" },
+  { "id": "24", "korean": "어머니", "romanisation": "eomeoni", "translation": "Mère", "categoryId": "6" }
 ]
