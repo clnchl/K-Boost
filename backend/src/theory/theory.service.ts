@@ -10,6 +10,7 @@ export interface Category {
 export interface Word {
   id: string;
   korean: string;
+  romanisation: string;
   translation: string;
   categoryId: string;
 }
@@ -17,9 +18,10 @@ export interface Word {
 export interface WordDetail {
   id: string;
   korean: string;
+  romanisation: string;
   translation: string;
-  definition: string;
-  example?: string;
+  grammaticalType: string;
+  exampleSentence: string;
 }
 
 @Injectable()
@@ -49,6 +51,9 @@ export class TheoryService {
   }
 
   getWordsByCategory(categoryId: string): Word[] {
+    if (categoryId == '0') {
+      return this.words;
+    }
     return this.words.filter((word) => word.categoryId === categoryId);
   }
 

@@ -5,15 +5,17 @@ export interface Category {
 export interface Word {
     id: string;
     korean: string;
+    romanisation: string;
     translation: string;
     categoryId: string;
 }
 export interface WordDetail {
     id: string;
     korean: string;
+    romanisation: string;
     translation: string;
-    definition: string;
-    example?: string;
+    grammaticalType: string;
+    exampleSentence: string;
 }
 export declare class TheoryService {
     private readonly categories;
