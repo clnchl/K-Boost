@@ -1,0 +1,5 @@
+[
+  { "id": "w1", "korean": "annyeong", "translation": "hello", "categoryId": "basics" },
+  { "id": "w2", "korean": "gamsa", "translation": "thanks", "categoryId": "basics" },
+  { "id": "w3", "korean": "bap", "translation": "rice", "categoryId": "food" }
+]
