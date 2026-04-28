@@ -1,0 +1,22 @@
+[
+  {
+    "id": "w1",
+    "korean": "annyeong",
+    "translation": "hello",
+    "definition": "casual greeting",
+    "example": "annyeong!"
+  },
+  {
+    "id": "w2",
+    "korean": "gamsa",
+    "translation": "thanks",
+    "definition": "gratitude",
+    "example": "gamsa!"
+  },
+  {
+    "id": "w3",
+    "korean": "bap",
+    "translation": "rice",
+    "definition": "cooked rice"
+  }
+]
