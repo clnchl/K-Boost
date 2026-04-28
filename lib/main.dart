@@ -1,7 +1,11 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'features/theory/presentation/screens/theory_screen.dart';
 
 void main() {
-  runApp(const KBoostApp());
+  runApp(
+    const ProviderScope(child: KBoostApp()),
+  ); // ProviderScope pour Riverpod
 }
 
 class KBoostApp extends StatelessWidget {
@@ -11,12 +15,12 @@ class KBoostApp extends StatelessWidget {
   Widget build(BuildContext context) {
     return MaterialApp(
       title: 'K-Boost',
-      debugShowCheckedModeBanner: false,
       theme: ThemeData(
-        colorScheme: ColorScheme.fromSeed(seedColor: const Color(0xFF2E7D32)),
         useMaterial3: true,
+        colorScheme: ColorScheme.fromSeed(seedColor: Colors.green),
       ),
-      home: const Scaffold(backgroundColor: Colors.white),
+      debugShowCheckedModeBanner: false,
+      home: const TheoryScreen(),
     );
   }
 }
