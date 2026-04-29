@@ -3,12 +3,12 @@ import '../entities/word.dart';
 import '../entities/word_detail.dart';
 
 abstract class TheoryRepository {
-  /// Récupère la liste de toutes les catégories disponibles.
+  /// Récupère liste de tt les catégories dispo.
   Future<List<Category>> getCategories();
 
-  /// Récupère tous les mots d'une catégorie spécifique.
+  /// Récupère ts les mots d'une catégorie.
   Future<List<Word>> getWordsByCategory(String categoryId);
 
-  /// Récupère le détail complet d'un mot.
+  /// Récupère détail complet d'un mot.
   Future<WordDetail> getWordDetail(String wordId);
 }
