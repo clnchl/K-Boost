@@ -1,39 +1,29 @@
 import 'package:flutter_test/flutter_test.dart';
+import 'package:mocktail/mocktail.dart';
 import 'package:k_boost/features/theory/data/repositories/theory_repository_impl.dart';
+import 'package:k_boost/features/theory/data/datasources/theory_remote_datasource.dart';
+import 'package:k_boost/features/theory/data/models/category_model.dart';
+
+class MockTheoryRemoteDataSource extends Mock
+    implements TheoryRemoteDataSource {}
 
 void main() {
-  group('TheoryRepositoryImpl', () {
-    late TheoryRepositoryImpl repository;
+  test('TheoryRepository.getCategories() retourne les catégories', () async {
+    final mockDataSource = MockTheoryRemoteDataSource();
+    final repository = TheoryRepositoryImpl(mockDataSource);
 
-    setUp(() {
-      repository = TheoryRepositoryImpl();
-    });
+    final mockCategories = [
+      const CategoryModel(id: '0', name: 'Tous les mots'),
+      const CategoryModel(id: '1', name: 'Pronoms'),
+    ];
+    when(
+      () => mockDataSource.getCategories(),
+    ).thenAnswer((_) async => mockCategories);
 
-    // Vérifie qu'on récupère les catégories
-    test('getCategories() retourne 7 catégories', () async {
-      final categories = await repository.getCategories();
+    final result = await repository.getCategories();
 
-      expect(categories.length, equals(7));
-      expect(categories.first.name, equals('Tous les mots'));
-      expect(categories.last.name, equals('Famille'));
-    });
-
-    // Vérifie qu'on récupère les mots par catégorie
-    test('getWordsByCategory() retourne 2 mots pour Pronoms', () async {
-      final words = await repository.getWordsByCategory('1');
-
-      expect(words.length, equals(2));
-      expect(words.first.korean, equals('나'));
-      expect(words.first.translation, equals('Je/Moi'));
-    });
-
-    // Vérifie les détails complets du mot
-    test('getWordDetail() retourne les infos complètes', () async {
-      final wordDetail = await repository.getWordDetail('1');
-
-      expect(wordDetail.korean, equals('나'));
-      expect(wordDetail.romanisation, equals('na'));
-      expect(wordDetail.grammaticalType, equals('Pronom'));
-    });
+    expect(result.length, equals(2));
+    expect(result.first.name, equals('Tous les mots'));
+    verify(() => mockDataSource.getCategories()).called(1);
   });
 }

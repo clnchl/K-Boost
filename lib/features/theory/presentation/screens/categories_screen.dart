@@ -31,7 +31,7 @@ class CategoriesScreen extends ConsumerWidget {
                 title: Text(category.name),
                 onTap: () {
                   print('Catégorie sélectionnée: ${category.name}');
-                  // On ajoutera la navigation plus tard
+              
                 },
               );
             },

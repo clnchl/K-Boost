@@ -30,7 +30,7 @@ class WordDetailScreen extends ConsumerWidget {
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  // TITRE: Le mot en coréen
+                  // MOT EN CORÉEN
                   Text(
                     wordDetail.korean,
                     style: const TextStyle(
