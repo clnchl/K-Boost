@@ -1,4 +1,5 @@
 import { Injectable } from '@nestjs/common';
+import { BadRequestException, NotFoundException } from '@nestjs/common';
 import { readFileSync } from 'node:fs';
 import { join } from 'node:path';
 
@@ -59,14 +60,40 @@ export class TheoryService {
 
   // Retourne tous les mots d'une catégorie (ou tous les mots si categoryId = '0')
   getWordsByCategory(categoryId: string): Word[] {
+    // Gestion d'erreur si l'ID est vide
+    if (!categoryId || categoryId.trim() === '') {
+      throw new BadRequestException('Category ID is required');
+    }
+
     if (categoryId == '0') {
       return this.words;
     }
-    return this.words.filter((word) => word.categoryId === categoryId);
+    
+    const filteredWords = this.words.filter((word) => word.categoryId === categoryId);
+    
+    // Gestion d'erreur si la catégorie n'existe pas
+    const categoryExists = this.categories.find((cat) => cat.id === categoryId);
+    if (!categoryExists) {
+      throw new NotFoundException(`Category with ID ${categoryId} not found`);
+    }
+    
+    return filteredWords;
   }
 
   // Retourne le détail d'un mot spécifique par son ID
   getWordDetail(wordId: string): WordDetail | undefined {
-    return this.wordDetails.find((detail) => detail.id === wordId);
+    // Gestion d'erreur si l'id est vide
+    if (!wordId || wordId.trim() === '') {
+      throw new BadRequestException('Word ID is required');
+    }
+
+    const detail = this.wordDetails.find((detail) => detail.id === wordId);
+    
+    // Gestion d'erreur si le mot n'existe pas
+    if (!detail) {
+      throw new NotFoundException(`Word with ID ${wordId} not found`);
+    }
+
+    return detail;
   }
 }
