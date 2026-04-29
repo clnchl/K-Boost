@@ -11,6 +11,7 @@ var __metadata = (this && this.__metadata) || function (k, v) {
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.TheoryService = void 0;
 const common_1 = require("@nestjs/common");
+const common_2 = require("@nestjs/common");
 const node_fs_1 = require("node:fs");
 const node_path_1 = require("node:path");
 let TheoryService = class TheoryService {
@@ -27,13 +28,28 @@ let TheoryService = class TheoryService {
         return this.categories;
     }
     getWordsByCategory(categoryId) {
+        if (!categoryId || categoryId.trim() === '') {
+            throw new common_2.BadRequestException('Category ID is required');
+        }
         if (categoryId == '0') {
             return this.words;
         }
-        return this.words.filter((word) => word.categoryId === categoryId);
+        const filteredWords = this.words.filter((word) => word.categoryId === categoryId);
+        const categoryExists = this.categories.find((cat) => cat.id === categoryId);
+        if (!categoryExists) {
+            throw new common_2.NotFoundException(`Category with ID ${categoryId} not found`);
+        }
+        return filteredWords;
     }
     getWordDetail(wordId) {
-        return this.wordDetails.find((detail) => detail.id === wordId);
+        if (!wordId || wordId.trim() === '') {
+            throw new common_2.BadRequestException('Word ID is required');
+        }
+        const detail = this.wordDetails.find((detail) => detail.id === wordId);
+        if (!detail) {
+            throw new common_2.NotFoundException(`Word with ID ${wordId} not found`);
+        }
+        return detail;
     }
 };
 exports.TheoryService = TheoryService;
