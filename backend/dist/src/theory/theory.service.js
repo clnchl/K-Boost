@@ -12,40 +12,44 @@ Object.defineProperty(exports, "__esModule", { value: true });
 exports.TheoryService = void 0;
 const common_1 = require("@nestjs/common");
 const common_2 = require("@nestjs/common");
-const node_fs_1 = require("node:fs");
-const node_path_1 = require("node:path");
+const prisma_service_1 = require("../prisma/prisma.service");
 let TheoryService = class TheoryService {
-    categories;
-    words;
-    wordDetails;
-    constructor() {
-        const dataDir = (0, node_path_1.join)(process.cwd(), 'src', 'theory', 'data');
-        this.categories = JSON.parse((0, node_fs_1.readFileSync)((0, node_path_1.join)(dataDir, 'categories.json'), 'utf-8'));
-        this.words = JSON.parse((0, node_fs_1.readFileSync)((0, node_path_1.join)(dataDir, 'words.json'), 'utf-8'));
-        this.wordDetails = JSON.parse((0, node_fs_1.readFileSync)((0, node_path_1.join)(dataDir, 'word_details.json'), 'utf-8'));
+    prisma;
+    constructor(prisma) {
+        this.prisma = prisma;
     }
-    getCategories() {
-        return this.categories;
+    async getCategories() {
+        return this.prisma.category.findMany({
+            orderBy: { id: 'asc' }
+        });
     }
-    getWordsByCategory(categoryId) {
+    async getWordsByCategory(categoryId) {
         if (!categoryId || categoryId.trim() === '') {
             throw new common_2.BadRequestException('Category ID is required');
         }
         if (categoryId == '0') {
-            return this.words;
+            return this.prisma.word.findMany({
+                orderBy: { id: 'asc' }
+            });
         }
-        const filteredWords = this.words.filter((word) => word.categoryId === categoryId);
-        const categoryExists = this.categories.find((cat) => cat.id === categoryId);
+        const categoryExists = await this.prisma.category.findUnique({
+            where: { id: categoryId }
+        });
         if (!categoryExists) {
             throw new common_2.NotFoundException(`Category with ID ${categoryId} not found`);
         }
-        return filteredWords;
+        return this.prisma.word.findMany({
+            where: { categoryId },
+            orderBy: { id: 'asc' }
+        });
     }
-    getWordDetail(wordId) {
+    async getWordDetail(wordId) {
         if (!wordId || wordId.trim() === '') {
             throw new common_2.BadRequestException('Word ID is required');
         }
-        const detail = this.wordDetails.find((detail) => detail.id === wordId);
+        const detail = await this.prisma.wordDetail.findUnique({
+            where: { wordId }
+        });
         if (!detail) {
             throw new common_2.NotFoundException(`Word with ID ${wordId} not found`);
         }
@@ -55,6 +59,6 @@ let TheoryService = class TheoryService {
 exports.TheoryService = TheoryService;
 exports.TheoryService = TheoryService = __decorate([
     (0, common_1.Injectable)(),
-    __metadata("design:paramtypes", [])
+    __metadata("design:paramtypes", [prisma_service_1.PrismaService])
 ], TheoryService);
 //# sourceMappingURL=theory.service.js.map

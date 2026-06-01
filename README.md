@@ -62,15 +62,16 @@ Initialisation rapide (dev) :
 
 ```bash
 cd backend
+cp .env.example .env   # puis éditer DATABASE_URL
 npm install
-npx prisma migrate dev --name init
-npx ts-node prisma/seed.ts
+npm run db:migrate
+npm run db:seed
 ```
 
 Notes :
-- Les données de départ sont dans `backend/src/theory/data/*.json`.
-- Le seed utilise `prisma/seed.ts` (pratique pour re-seed en dev).
-- Config de connexion dans `backend/.env` via `DATABASE_URL`.
+- L'API lit **uniquement PostgreSQL** (Prisma) à l'exécution.
+- Les fichiers `backend/src/theory/data/*.json` servent **seulement** au seed (`npm run db:seed`).
+- Connexion : `DATABASE_URL` dans `backend/.env`.
 
 ## Organisation du projet
 

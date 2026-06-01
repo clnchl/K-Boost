@@ -1,8 +1,9 @@
-import { TheoryService, Category, Word, WordDetail } from './theory.service';
+import { Category, Word, WordDetail } from '@prisma/client';
+import { TheoryService } from './theory.service';
 export declare class TheoryController {
     private readonly theoryService;
     constructor(theoryService: TheoryService);
-    getCategories(): Category[];
-    getWordsByCategory(id: string): Word[];
-    getWordDetail(id: string): WordDetail | undefined;
+    getCategories(): Promise<Category[]>;
+    getWordsByCategory(id: string): Promise<Word[]>;
+    getWordDetail(id: string): Promise<WordDetail>;
 }

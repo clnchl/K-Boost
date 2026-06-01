@@ -1,26 +1,40 @@
 import { Test, TestingModule } from '@nestjs/testing';
 import { TheoryService } from '../src/theory/theory.service';
+import { PrismaService } from '../src/prisma/prisma.service';
 
-// Ce test vérifie que le service récupère bien les catégories depuis les fichiers JSON
 describe('TheoryService.getCategories (unit)', () => {
   let service: TheoryService;
 
-  beforeAll(async () => {
-    // On crée le service au début du test
+  const mockCategories = [
+    { id: '0', name: 'Tous les mots' },
+    { id: '1', name: 'Pronoms' },
+  ];
+
+  const prisma = {
+    category: {
+      findMany: jest.fn().mockResolvedValue(mockCategories),
+    },
+  };
+
+  beforeEach(async () => {
     const module: TestingModule = await Test.createTestingModule({
-      providers: [TheoryService],
+      providers: [
+        TheoryService,
+        { provide: PrismaService, useValue: prisma },
+      ],
     }).compile();
+
     service = module.get<TheoryService>(TheoryService);
+    jest.clearAllMocks();
   });
 
-  it('le service renvoie un tableau de catégories avec id et name', () => {
-    // On appelle la méthode getCategories()
-    const cats = service.getCategories();
-    // On vérifie que c'est un tableau
-    expect(Array.isArray(cats)).toBe(true);
-    // On vérifie qu'il est pas vide
-    expect(cats.length).toBeGreaterThan(0);
-    // On vérifie que chaque catégorie a les bonnes propriétés
+  it('renvoie les catégories depuis la base de données', async () => {
+    const cats = await service.getCategories();
+
+    expect(prisma.category.findMany).toHaveBeenCalledWith({
+      orderBy: { id: 'asc' },
+    });
+    expect(cats).toEqual(mockCategories);
     expect(cats[0]).toHaveProperty('id');
     expect(cats[0]).toHaveProperty('name');
   });

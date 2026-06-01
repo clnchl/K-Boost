@@ -20,13 +20,13 @@ let TheoryController = class TheoryController {
     constructor(theoryService) {
         this.theoryService = theoryService;
     }
-    getCategories() {
+    async getCategories() {
         return this.theoryService.getCategories();
     }
-    getWordsByCategory(id) {
+    async getWordsByCategory(id) {
         return this.theoryService.getWordsByCategory(id);
     }
-    getWordDetail(id) {
+    async getWordDetail(id) {
         return this.theoryService.getWordDetail(id);
     }
 };
@@ -35,21 +35,21 @@ __decorate([
     (0, common_1.Get)('categories'),
     __metadata("design:type", Function),
     __metadata("design:paramtypes", []),
-    __metadata("design:returntype", Array)
+    __metadata("design:returntype", Promise)
 ], TheoryController.prototype, "getCategories", null);
 __decorate([
     (0, common_1.Get)('categories/:id/words'),
     __param(0, (0, common_1.Param)('id')),
     __metadata("design:type", Function),
     __metadata("design:paramtypes", [String]),
-    __metadata("design:returntype", Array)
+    __metadata("design:returntype", Promise)
 ], TheoryController.prototype, "getWordsByCategory", null);
 __decorate([
     (0, common_1.Get)('words/:id'),
     __param(0, (0, common_1.Param)('id')),
     __metadata("design:type", Function),
     __metadata("design:paramtypes", [String]),
-    __metadata("design:returntype", Object)
+    __metadata("design:returntype", Promise)
 ], TheoryController.prototype, "getWordDetail", null);
 exports.TheoryController = TheoryController = __decorate([
     (0, common_1.Controller)('theory'),

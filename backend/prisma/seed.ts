@@ -1,7 +1,7 @@
-import "dotenv/config";
-import { PrismaClient } from "@prisma/client";
-import { readFile } from "node:fs/promises";
-import { resolve } from "node:path";
+import 'dotenv/config';
+import { PrismaClient } from '@prisma/client';
+import { readFile } from 'node:fs/promises';
+import { resolve } from 'node:path';
 
 const prisma = new PrismaClient();
 
@@ -27,33 +27,33 @@ type WordDetailJson = {
   exampleSentence: string;
 };
 
-const baseDir = resolve(__dirname, "..");
+const baseDir = resolve(__dirname, '..');
 
 async function loadJson<T>(relativePath: string): Promise<T> {
   const absolutePath = resolve(baseDir, relativePath);
-  const raw = await readFile(absolutePath, "utf-8");
+  const raw = await readFile(absolutePath, 'utf-8');
   return JSON.parse(raw) as T;
 }
 
 async function main() {
   const categories = await loadJson<CategoryJson[]>(
-    "src/theory/data/categories.json",
+    'src/theory/data/categories.json',
   );
-  const words = await loadJson<WordJson[]>("src/theory/data/words.json");
+  const words = await loadJson<WordJson[]>('src/theory/data/words.json');
   const wordDetails = await loadJson<WordDetailJson[]>(
-    "src/theory/data/word_details.json",
+    'src/theory/data/word_details.json',
   );
 
-  console.log("Seed cwd:", process.cwd());
-  console.log("Seed baseDir:", baseDir);
-  console.log("Seed counts:", {
+  console.log('Seed cwd:', process.cwd());
+  console.log('Seed baseDir:', baseDir);
+  console.log('Seed counts:', {
     categories: categories.length,
     words: words.length,
     wordDetails: wordDetails.length,
   });
 
   if (!categories.length || !words.length || !wordDetails.length) {
-    throw new Error("Seed data not found or empty. Check JSON paths.");
+    throw new Error('Seed data not found or empty. Check JSON paths.');
   }
 
   for (const category of categories) {
@@ -108,7 +108,7 @@ async function main() {
 
 main()
   .catch((error) => {
-    console.error("Seed failed:", error);
+    console.error('Seed failed:', error);
     process.exitCode = 1;
   })
   .finally(async () => {
