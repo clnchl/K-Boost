@@ -5,7 +5,7 @@
     "romanisation": "na",
     "translation": "Je/Moi",
     "grammaticalType": "Pronom",
-    "exampleSentence": "나는 학생입니다 (na-neun haksaeng-imnida) - Je suis un étudiant"
+    "exampleSentence": "나는 학생입니다 (na-neun haksaeng-imnida) - Je suis étudiant"
   },
   {
     "id": "2",
@@ -13,7 +13,7 @@
     "romanisation": "neo",
     "translation": "Tu/Toi",
     "grammaticalType": "Pronom",
-    "exampleSentence": "너는 누구니? (neoneun nuguní?) - Qui es-tu?"
+    "exampleSentence": "너는 누구니? (neo-neun nuguni?) - Qui es-tu ?"
   },
   {
     "id": "4",
@@ -21,7 +21,7 @@
     "romanisation": "meokda",
     "translation": "Manger",
     "grammaticalType": "Verbe",
-    "exampleSentence": "나는 밥을 먹습니다 (na-neun bab-eul meok-sseumnida) - Je mange du riz"
+    "exampleSentence": "나는 밥을 먹습니다 (na-neun bap-eul meokseumnida) - Je mange du riz"
   },
   {
     "id": "5",
@@ -36,24 +36,24 @@
     "korean": "크다",
     "romanisation": "keuda",
     "translation": "Grand",
-    "grammaticalType": "Adjectif",
-    "exampleSentence": "이 집은 크다 (i jib-eun keuda) - Cette maison est grande"
+    "grammaticalType": "Adjectif descriptif",
+    "exampleSentence": "이 집은 커요 (i jib-eun keoyo) - Cette maison est grande"
   },
   {
     "id": "8",
     "korean": "작다",
     "romanisation": "jakda",
     "translation": "Petit",
-    "grammaticalType": "Adjectif",
-    "exampleSentence": "그 고양이는 작다 (geu goyang-i-neun jakda) - Ce chat est petit"
+    "grammaticalType": "Adjectif descriptif",
+    "exampleSentence": "그 고양이는 작아요 (geu goyangi-neun jagayo) - Ce chat est petit"
   },
   {
     "id": "15",
     "korean": "은/는",
     "romanisation": "eun/neun",
-    "translation": "Particule de sujet",
+    "translation": "Particule de thème",
     "grammaticalType": "Particule",
-    "exampleSentence": "나는 학생입니다 (na-neun haksaeng-imnida) - Je suis un étudiant"
+    "exampleSentence": "나는 학생입니다 (na-neun haksaeng-imnida) - Quant à moi, je suis étudiant"
   },
   {
     "id": "16",
@@ -61,7 +61,15 @@
     "romanisation": "eul/reul",
     "translation": "Particule d'objet",
     "grammaticalType": "Particule",
-    "exampleSentence": "밥을 먹습니다 (bab-eul meok-sseumnida) - Manger du riz"
+    "exampleSentence": "밥을 먹습니다 (bap-eul meokseumnida) - Je mange du riz"
+  },
+  {
+    "id": "17",
+    "korean": "이/가",
+    "romanisation": "i/ga",
+    "translation": "Particule de sujet",
+    "grammaticalType": "Particule",
+    "exampleSentence": "고양이가 귀여워요 (goyangi-ga gwiyeowoyo) - Le chat est mignon"
   },
   {
     "id": "18",
@@ -77,7 +85,7 @@
     "romanisation": "dul",
     "translation": "Deux",
     "grammaticalType": "Nombre",
-    "exampleSentence": "그들은 둘입니다 (geudel-eun dul-imnida) - Ils sont deux"
+    "exampleSentence": "사과가 둘 있어요 (sagwa-ga dul isseoyo) - Il y a deux pommes"
   },
   {
     "id": "23",
@@ -93,6 +101,286 @@
     "romanisation": "eomeoni",
     "translation": "Mère",
     "grammaticalType": "Nom",
-    "exampleSentence": "어머니는 선생님입니다 (eomeoni-neun seongsaengnim-imnida) - Ma mère est professeur"
+    "exampleSentence": "어머니는 선생님입니다 (eomeoni-neun seonsaengnim-imnida) - Ma mère est professeure"
+  },
+  {
+    "id": "25",
+    "korean": "안녕하세요",
+    "romanisation": "annyeonghaseyo",
+    "translation": "Bonjour",
+    "grammaticalType": "Salutation",
+    "exampleSentence": "안녕하세요! (annyeonghaseyo!) - Bonjour !"
+  },
+  {
+    "id": "26",
+    "korean": "감사합니다",
+    "romanisation": "gamsahamnida",
+    "translation": "Merci",
+    "grammaticalType": "Salutation",
+    "exampleSentence": "감사합니다 (gamsahamnida) - Merci"
+  },
+  {
+    "id": "27",
+    "korean": "죄송합니다",
+    "romanisation": "joesonghamnida",
+    "translation": "Désolé / Pardon",
+    "grammaticalType": "Salutation",
+    "exampleSentence": "죄송합니다 (joesonghamnida) - Je suis désolé"
+  },
+  {
+    "id": "28",
+    "korean": "안녕히 가세요",
+    "romanisation": "annyeonghi gaseyo",
+    "translation": "Au revoir",
+    "grammaticalType": "Salutation",
+    "exampleSentence": "안녕히 가세요! (annyeonghi gaseyo!) - Au revoir !"
+  },
+  {
+    "id": "29",
+    "korean": "사람",
+    "romanisation": "saram",
+    "translation": "Personne",
+    "grammaticalType": "Nom",
+    "exampleSentence": "좋은 사람입니다 (joeun saram-imnida) - C'est une bonne personne"
+  },
+  {
+    "id": "30",
+    "korean": "학생",
+    "romanisation": "haksaeng",
+    "translation": "Étudiant",
+    "grammaticalType": "Nom",
+    "exampleSentence": "저는 학생입니다 (jeoneun haksaeng-imnida) - Je suis étudiant"
+  },
+  {
+    "id": "31",
+    "korean": "학교",
+    "romanisation": "hakgyo",
+    "translation": "École",
+    "grammaticalType": "Nom",
+    "exampleSentence": "학교에 갑니다 (hakgyo-e gamnida) - Je vais à l'école"
+  },
+  {
+    "id": "32",
+    "korean": "집",
+    "romanisation": "jip",
+    "translation": "Maison",
+    "grammaticalType": "Nom",
+    "exampleSentence": "집에 있어요 (jib-e isseoyo) - Je suis à la maison"
+  },
+  {
+    "id": "33",
+    "korean": "물",
+    "romanisation": "mul",
+    "translation": "Eau",
+    "grammaticalType": "Nom",
+    "exampleSentence": "물을 마셔요 (mul-eul masyeoyo) - Je bois de l'eau"
+  },
+  {
+    "id": "34",
+    "korean": "밥",
+    "romanisation": "bap",
+    "translation": "Riz / Repas",
+    "grammaticalType": "Nom",
+    "exampleSentence": "밥을 먹어요 (bap-eul meogeoyo) - Je mange un repas"
+  },
+  {
+    "id": "35",
+    "korean": "책",
+    "romanisation": "chaek",
+    "translation": "Livre",
+    "grammaticalType": "Nom",
+    "exampleSentence": "책을 읽어요 (chaek-eul ilgeoyo) - Je lis un livre"
+  },
+  {
+    "id": "36",
+    "korean": "친구",
+    "romanisation": "chingu",
+    "translation": "Ami",
+    "grammaticalType": "Nom",
+    "exampleSentence": "친구를 만나요 (chingu-reul mannayo) - Je rencontre un ami"
+  },
+  {
+    "id": "37",
+    "korean": "누구",
+    "romanisation": "nugu",
+    "translation": "Qui",
+    "grammaticalType": "Mot interrogatif",
+    "exampleSentence": "저 사람은 누구예요? (jeo saram-eun nugu-yeyo?) - Qui est cette personne ?"
+  },
+  {
+    "id": "38",
+    "korean": "무엇",
+    "romanisation": "mueot",
+    "translation": "Quoi",
+    "grammaticalType": "Mot interrogatif",
+    "exampleSentence": "무엇을 먹어요? (mueos-eul meogeoyo?) - Que manges-tu ?"
+  },
+  {
+    "id": "39",
+    "korean": "어디",
+    "romanisation": "eodi",
+    "translation": "Où",
+    "grammaticalType": "Mot interrogatif",
+    "exampleSentence": "학교는 어디에 있어요? (hakgyo-neun eodie isseoyo?) - Où est l'école ?"
+  },
+  {
+    "id": "40",
+    "korean": "언제",
+    "romanisation": "eonje",
+    "translation": "Quand",
+    "grammaticalType": "Mot interrogatif",
+    "exampleSentence": "언제 가요? (eonje gayo?) - Quand pars-tu ?"
+  },
+  {
+    "id": "41",
+    "korean": "왜",
+    "romanisation": "wae",
+    "translation": "Pourquoi",
+    "grammaticalType": "Mot interrogatif",
+    "exampleSentence": "왜 웃어요? (wae useoyo?) - Pourquoi ris-tu ?"
+  },
+  {
+    "id": "42",
+    "korean": "어떻게",
+    "romanisation": "eotteoke",
+    "translation": "Comment",
+    "grammaticalType": "Mot interrogatif",
+    "exampleSentence": "어떻게 가요? (eotteoke gayo?) - Comment y aller ?"
+  },
+  {
+    "id": "43",
+    "korean": "보다",
+    "romanisation": "boda",
+    "translation": "Voir",
+    "grammaticalType": "Verbe",
+    "exampleSentence": "영화를 봐요 (yeonghwa-reul bwayo) - Je regarde un film"
+  },
+  {
+    "id": "44",
+    "korean": "하다",
+    "romanisation": "hada",
+    "translation": "Faire",
+    "grammaticalType": "Verbe",
+    "exampleSentence": "숙제를 해요 (sukje-reul haeyo) - Je fais mes devoirs"
+  },
+  {
+    "id": "45",
+    "korean": "오다",
+    "romanisation": "oda",
+    "translation": "Venir",
+    "grammaticalType": "Verbe",
+    "exampleSentence": "친구가 와요 (chingu-ga wayo) - Mon ami vient"
+  },
+  {
+    "id": "46",
+    "korean": "마시다",
+    "romanisation": "masida",
+    "translation": "Boire",
+    "grammaticalType": "Verbe",
+    "exampleSentence": "물을 마셔요 (mul-eul masyeoyo) - Je bois de l'eau"
+  },
+  {
+    "id": "47",
+    "korean": "공부하다",
+    "romanisation": "gongbuhada",
+    "translation": "Étudier",
+    "grammaticalType": "Verbe",
+    "exampleSentence": "한국어를 공부해요 (hangugeo-reul gongbuhaeyo) - J'étudie le coréen"
+  },
+  {
+    "id": "48",
+    "korean": "좋다",
+    "romanisation": "jota",
+    "translation": "Bon",
+    "grammaticalType": "Adjectif descriptif",
+    "exampleSentence": "날씨가 좋아요 (nalssi-ga joayo) - Il fait beau"
+  },
+  {
+    "id": "49",
+    "korean": "나쁘다",
+    "romanisation": "nappeuda",
+    "translation": "Mauvais",
+    "grammaticalType": "Adjectif descriptif",
+    "exampleSentence": "기분이 나빠요 (gibun-i nappayo) - Je me sens mal"
+  },
+  {
+    "id": "50",
+    "korean": "빠르다",
+    "romanisation": "ppareuda",
+    "translation": "Rapide",
+    "grammaticalType": "Adjectif descriptif",
+    "exampleSentence": "기차가 빨라요 (gicha-ga ppallayo) - Le train est rapide"
+  },
+  {
+    "id": "51",
+    "korean": "느리다",
+    "romanisation": "neurida",
+    "translation": "Lent",
+    "grammaticalType": "Adjectif descriptif",
+    "exampleSentence": "인터넷이 느려요 (inteonet-i neuryeoyo) - Internet est lent"
+  },
+  {
+    "id": "52",
+    "korean": "셋",
+    "romanisation": "set",
+    "translation": "Trois",
+    "grammaticalType": "Nombre",
+    "exampleSentence": "고양이가 셋 있어요 (goyangi-ga set isseoyo) - Il y a trois chats"
+  },
+  {
+    "id": "53",
+    "korean": "넷",
+    "romanisation": "net",
+    "translation": "Quatre",
+    "grammaticalType": "Nombre",
+    "exampleSentence": "사과가 넷 있어요 (sagwa-ga net isseoyo) - Il y a quatre pommes"
+  },
+  {
+    "id": "54",
+    "korean": "다섯",
+    "romanisation": "daseot",
+    "translation": "Cinq",
+    "grammaticalType": "Nombre",
+    "exampleSentence": "학생이 다섯 명 있어요 (haksaeng-i daseot myeong isseoyo) - Il y a cinq étudiants"
+  },
+  {
+    "id": "55",
+    "korean": "형",
+    "romanisation": "hyeong",
+    "translation": "Grand frère (pour un garçon)",
+    "grammaticalType": "Nom",
+    "exampleSentence": "형이 집에 있어요 (hyeong-i jib-e isseoyo) - Mon grand frère est à la maison"
+  },
+  {
+    "id": "56",
+    "korean": "누나",
+    "romanisation": "nuna",
+    "translation": "Grande sœur (pour un garçon)",
+    "grammaticalType": "Nom",
+    "exampleSentence": "누나가 친절해요 (nuna-ga chinjeolhaeyo) - Ma grande sœur est gentille"
+  },
+  {
+    "id": "57",
+    "korean": "오늘",
+    "romanisation": "oneul",
+    "translation": "Aujourd'hui",
+    "grammaticalType": "Nom temporel",
+    "exampleSentence": "오늘 날씨가 좋아요 (oneul nalssi-ga joayo) - Il fait beau aujourd'hui"
+  },
+  {
+    "id": "58",
+    "korean": "내일",
+    "romanisation": "naeil",
+    "translation": "Demain",
+    "grammaticalType": "Nom temporel",
+    "exampleSentence": "내일 학교에 가요 (naeil hakgyo-e gayo) - Je vais à l'école demain"
+  },
+  {
+    "id": "59",
+    "korean": "어제",
+    "romanisation": "eoje",
+    "translation": "Hier",
+    "grammaticalType": "Nom temporel",
+    "exampleSentence": "어제 친구를 만났어요 (eoje chingu-reul mannasseoyo) - J'ai rencontré un ami hier"
   }
 ]

@@ -1,14 +1,59 @@
 [
+  { "id": "25", "korean": "안녕하세요", "romanisation": "annyeonghaseyo", "translation": "Bonjour", "categoryId": "7" },
+  { "id": "26", "korean": "감사합니다", "romanisation": "gamsahamnida", "translation": "Merci", "categoryId": "7" },
+  { "id": "27", "korean": "죄송합니다", "romanisation": "joesonghamnida", "translation": "Pardon / Désolé", "categoryId": "7" },
+  { "id": "28", "korean": "안녕히 가세요", "romanisation": "annyeonghi gaseyo", "translation": "Au revoir", "categoryId": "7" },
+
+  { "id": "29", "korean": "사람", "romanisation": "saram", "translation": "Personne", "categoryId": "8" },
+  { "id": "30", "korean": "학생", "romanisation": "haksaeng", "translation": "Étudiant", "categoryId": "8" },
+  { "id": "31", "korean": "학교", "romanisation": "hakgyo", "translation": "École", "categoryId": "8" },
+  { "id": "32", "korean": "집", "romanisation": "jip", "translation": "Maison", "categoryId": "8" },
+  { "id": "33", "korean": "물", "romanisation": "mul", "translation": "Eau", "categoryId": "8" },
+  { "id": "34", "korean": "밥", "romanisation": "bap", "translation": "Riz / Repas", "categoryId": "8" },
+  { "id": "35", "korean": "책", "romanisation": "chaek", "translation": "Livre", "categoryId": "8" },
+  { "id": "36", "korean": "친구", "romanisation": "chingu", "translation": "Ami", "categoryId": "8" },
+
+  { "id": "37", "korean": "누구", "romanisation": "nugu", "translation": "Qui", "categoryId": "9" },
+  { "id": "38", "korean": "무엇", "romanisation": "mueot", "translation": "Quoi", "categoryId": "9" },
+  { "id": "39", "korean": "어디", "romanisation": "eodi", "translation": "Où", "categoryId": "9" },
+  { "id": "40", "korean": "언제", "romanisation": "eonje", "translation": "Quand", "categoryId": "9" },
+  { "id": "41", "korean": "왜", "romanisation": "wae", "translation": "Pourquoi", "categoryId": "9" },
+  { "id": "42", "korean": "어떻게", "romanisation": "eotteoke", "translation": "Comment", "categoryId": "9" },
+
   { "id": "1", "korean": "나", "romanisation": "na", "translation": "Je/Moi", "categoryId": "1" },
   { "id": "2", "korean": "너", "romanisation": "neo", "translation": "Tu/Toi", "categoryId": "1" },
+
+  { "id": "43", "korean": "보다", "romanisation": "boda", "translation": "Voir", "categoryId": "2" },
+  { "id": "44", "korean": "하다", "romanisation": "hada", "translation": "Faire", "categoryId": "2" },
+  { "id": "45", "korean": "오다", "romanisation": "oda", "translation": "Venir", "categoryId": "2" },
+  { "id": "46", "korean": "마시다", "romanisation": "masida", "translation": "Boire", "categoryId": "2" },
+  { "id": "47", "korean": "공부하다", "romanisation": "gongbuhada", "translation": "Étudier", "categoryId": "2" },
   { "id": "4", "korean": "먹다", "romanisation": "meokda", "translation": "Manger", "categoryId": "2" },
   { "id": "5", "korean": "가다", "romanisation": "gada", "translation": "Aller", "categoryId": "2" },
+
+  { "id": "48", "korean": "좋다", "romanisation": "jota", "translation": "Bon", "categoryId": "3" },
+  { "id": "49", "korean": "나쁘다", "romanisation": "nappeuda", "translation": "Mauvais", "categoryId": "3" },
+  { "id": "50", "korean": "빠르다", "romanisation": "ppareuda", "translation": "Rapide", "categoryId": "3" },
+  { "id": "51", "korean": "느리다", "romanisation": "neurida", "translation": "Lent", "categoryId": "3" },
   { "id": "7", "korean": "크다", "romanisation": "keuda", "translation": "Grand", "categoryId": "3" },
   { "id": "8", "korean": "작다", "romanisation": "jakda", "translation": "Petit", "categoryId": "3" },
-  { "id": "15", "korean": "은/는", "romanisation": "eun/neun", "translation": "Particule de sujet", "categoryId": "4" },
+
+  { "id": "15", "korean": "은/는", "romanisation": "eun/neun", "translation": "Particule de thème", "categoryId": "4" },
   { "id": "16", "korean": "을/를", "romanisation": "eul/reul", "translation": "Particule d'objet", "categoryId": "4" },
+  { "id": "17", "korean": "이/가", "romanisation": "i/ga", "translation": "Particule de sujet", "categoryId": "4" },
+
+  { "id": "52", "korean": "셋", "romanisation": "set", "translation": "Trois", "categoryId": "5" },
+  { "id": "53", "korean": "넷", "romanisation": "net", "translation": "Quatre", "categoryId": "5" },
+  { "id": "54", "korean": "다섯", "romanisation": "daseot", "translation": "Cinq", "categoryId": "5" },
   { "id": "18", "korean": "하나", "romanisation": "hana", "translation": "Un", "categoryId": "5" },
   { "id": "19", "korean": "둘", "romanisation": "dul", "translation": "Deux", "categoryId": "5" },
+
+  { "id": "55", "korean": "형", "romanisation": "hyeong", "translation": "Grand frère (pour un garçon)", "categoryId": "6" },
+  { "id": "56", "korean": "누나", "romanisation": "nuna", "translation": "Grande sœur (pour un garçon)", "categoryId": "6" },
   { "id": "23", "korean": "아버지", "romanisation": "abeoji", "translation": "Père", "categoryId": "6" },
-  { "id": "24", "korean": "어머니", "romanisation": "eomeoni", "translation": "Mère", "categoryId": "6" }
+  { "id": "24", "korean": "어머니", "romanisation": "eomeoni", "translation": "Mère", "categoryId": "6" },
+
+  { "id": "57", "korean": "오늘", "romanisation": "oneul", "translation": "Aujourd'hui", "categoryId": "10" },
+  { "id": "58", "korean": "내일", "romanisation": "naeil", "translation": "Demain", "categoryId": "10" },
+  { "id": "59", "korean": "어제", "romanisation": "eoje", "translation": "Hier", "categoryId": "10" }
 ]
