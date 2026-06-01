@@ -1,0 +1,48 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+// Looking for ways to speed up your queries, or scale easily with your serverless or edge functions?
+// Try Prisma Accelerate: https://pris.ly/cli/accelerate-init
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model Category {
+  id    String @id
+  name  String
+  words Word[]
+
+  @@map("categories")
+}
+
+model Word {
+  id           String      @id
+  korean       String
+  romanisation String
+  translation  String
+  categoryId   String
+  category     Category    @relation(fields: [categoryId], references: [id])
+  detail       WordDetail?
+
+  @@index([categoryId])
+  @@map("words")
+}
+
+model WordDetail {
+  id               String @id
+  wordId           String @unique
+  korean           String
+  romanisation     String
+  translation      String
+  grammaticalType  String
+  exampleSentence  String
+  word             Word   @relation(fields: [wordId], references: [id])
+
+  @@map("word_details")
+}
