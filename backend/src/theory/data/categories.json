@@ -1,13 +1,46 @@
 [
-  { "id": "0", "name": "Tous les mots" },
-  { "id": "1", "name": "Pronoms" },
-  { "id": "2", "name": "Verbes" },
-  { "id": "3", "name": "Adjectif descriptif" },
-  { "id": "4", "name": "Particules" },
-  { "id": "5", "name": "Nombres" },
-  { "id": "6", "name": "Famille" },
-  { "id": "7", "name": "Salutations" },
-  { "id": "8", "name": "Noms communs" },
-  { "id": "9", "name": "Questions" },
-  { "id": "10", "name": "Temps et jours" }
-]*/
+  {
+    "id": "0",
+    "name": "Tous les mots"
+  },
+  {
+    "id": "1",
+    "name": "Pronoms"
+  },
+  {
+    "id": "2",
+    "name": "Verbes"
+  },
+  {
+    "id": "3",
+    "name": "Adjectif descriptif"
+  },
+  {
+    "id": "4",
+    "name": "Particules"
+  },
+  {
+    "id": "5",
+    "name": "Nombres"
+  },
+  {
+    "id": "6",
+    "name": "Famille"
+  },
+  {
+    "id": "7",
+    "name": "Salutations"
+  },
+  {
+    "id": "8",
+    "name": "Noms communs"
+  },
+  {
+    "id": "9",
+    "name": "Questions"
+  },
+  {
+    "id": "10",
+    "name": "Temps et jours"
+  }
+]
