@@ -1,18 +1,17 @@
 # K-Boost
-
 Application Flutter d'apprentissage des langues.
 
-## Prerequis
+## Prérequis
 
-- Flutter SDK installe (version stable)
-- Dart SDK (inclus avec Flutter)
+- Flutter SDK (stable)
+- Dart (inclus avec Flutter)
 - Android Studio ou VS Code
-- Pour iOS (macOS uniquement): Xcode
+- Pour iOS (macOS uniquement) : Xcode
 
-## Demarrage rapide
+## Démarrage rapide (mobile)
 
-1. Recuperer le projet
-2. Installer les dependances
+1. Récupérer le projet
+2. Installer les dépendances
 3. Lancer l'application
 
 ```bash
@@ -20,45 +19,63 @@ flutter pub get
 flutter run
 ```
 
-## Setup Windows (important)
+## Backend (NestJS)
 
-Si tu clones ce repo sur Windows:
+Le backend se trouve dans le dossier `backend/` et expose une API REST consommée par l'application mobile.
 
-1. Verifier Flutter
-
-```bash
-flutter doctor -v
-```
-
-2. Accepter les licences Android
+Commandes courantes :
 
 ```bash
-flutter doctor --android-licenses
+# depuis la racine du repo
+cd backend
+npm install
+npm run start:dev    # développement (watch)
+
+# ou en production
+npm run start:prod
 ```
 
-3. Lancer un emulateur Android puis l'app
+Vérifier une route (depuis l'hôte) :
 
 ```bash
-flutter emulators
-flutter emulators --launch <emulator_id>
-flutter run
+curl http://127.0.0.1:3000/theory/categories
 ```
 
-4. Optionnel: lancer sur Windows desktop
+Tests backend :
 
 ```bash
-flutter config --enable-windows-desktop
-flutter run -d windows
+# unitaires
+npm run test
+
+# e2e (configuration: test/jest-e2e.json)
+npm run test:e2e
+
+# couverture
+npm run test:cov
 ```
 
-## Compatibilite cross-platform
+## Base de données (PostgreSQL + Prisma)
 
-- Les fichiers locaux/generes sont ignores par Git.
-- Les fins de ligne sont normalisees via `.gitattributes` pour eviter les conflits macOS/Windows.
-- Les scripts Windows (`.bat`, `.cmd`, `.ps1`) gardent des fins de ligne CRLF.
+Pré-requis : PostgreSQL installé et démarré.
 
-## Tests
+Initialisation rapide (dev) :
 
 ```bash
-flutter test
+cd backend
+npm install
+npx prisma migrate dev --name init
+npx ts-node prisma/seed.ts
 ```
+
+Notes :
+- Les données de départ sont dans `backend/src/theory/data/*.json`.
+- Le seed utilise `prisma/seed.ts` (pratique pour re-seed en dev).
+- Config de connexion dans `backend/.env` via `DATABASE_URL`.
+
+## Organisation du projet
+
+- `lib/` : code Flutter (features, core, ui)
+- `android/`, `ios/`, `macos/`, `windows/`, `linux/`, `web/` : plateformes natives
+- `backend/` : API NestJS (TypeScript)
+- `test/` : tests Dart/Flutter
+
