@@ -1,19 +1,17 @@
 import { TheoryController } from '../src/theory/theory.controller';
 
-// Ce test vérifie que le controller transmet bien les données du service vers le front
 describe('TheoryController.getCategories (unit)', () => {
-  it('le controller renvoie bien les catégories que le service lui donne', () => {
-    // On crée un faux service
+  it('renvoie les catégories fournies par le service', async () => {
     const fakeCats = [{ id: '0', name: 'Tous' }];
-    const mockService: any = { getCategories: () => fakeCats };
+    const mockService = {
+      getCategories: jest.fn().mockResolvedValue(fakeCats),
+    };
 
-    // On crée le controller avec ce faux service
-    const controller = new TheoryController(mockService);
-    const result = controller.getCategories();
+    const controller = new TheoryController(mockService as never);
+    const result = await controller.getCategories();
 
-    // On vérifie que le controller renvoie ce qu'on a mis dans le faux service
-    expect(result).toBe(fakeCats);
-    expect(Array.isArray(result)).toBe(true);
+    expect(mockService.getCategories).toHaveBeenCalled();
+    expect(result).toEqual(fakeCats);
     expect(result[0]).toHaveProperty('id', '0');
   });
 });
