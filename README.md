@@ -1,82 +1,146 @@
 # K-Boost
-Application Flutter d'apprentissage des langues.
 
-## Prérequis
+Application Flutter + API NestJS + PostgreSQL.
 
-- Flutter SDK (stable)
-- Dart (inclus avec Flutter)
-- Android Studio ou VS Code
-- Pour iOS (macOS uniquement) : Xcode
+Architecture : [`expliquation.md`](./expliquation.md)
 
-## Démarrage rapide (mobile)
+---
 
-1. Récupérer le projet
-2. Installer les dépendances
-3. Lancer l'application
+## Vérifier les prérequis
 
 ```bash
-flutter pub get
-flutter run
+flutter --version
+node --version
+npm --version
+psql --version
 ```
 
-## Backend (NestJS)
+---
 
-Le backend se trouve dans le dossier `backend/` et expose une API REST consommée par l'application mobile.
+## Installation — première fois
 
-Commandes courantes :
+Exécuter **dans cet ordre**. Terminal 1 pour PostgreSQL + backend, terminal 2 pour Flutter.
+
+> **Base de données :** ton collègue ne recrée pas la BDD à chaque démarrage.
+> - `createdb` + `migrate` + `seed` → **une seule fois** sur sa machine (premier clone).
+> - Ensuite : seulement `npm run start:dev` + `flutter run` (voir « Démarrage au quotidien »).
+> - Il refait `createdb` / `seed` seulement si la base n'existe pas ou s'il veut tout réinitialiser.
+
+### 1. Base PostgreSQL (une seule fois)
 
 ```bash
-# depuis la racine du repo
+createdb kboost
+```
+
+```bash
+# Si createdb ne fonctionne pas :
+psql -U postgres -c "CREATE DATABASE kboost;"
+```
+
+### 2. Backend (terminal 1 — laisser ouvert à la fin)
+
+```bash
 cd backend
 npm install
-npm run start:dev    # développement (watch)
-
-# ou en production
-npm run start:prod
+cp .env.example .env
 ```
 
-Vérifier une route (depuis l'hôte) :
+Éditer `backend/.env` (remplacer `USER` et `PASSWORD`) :
+
+```bash
+# macOS / Linux
+nano .env
+```
+
+```bash
+cd backend
+npm run db:generate
+npm run db:migrate
+npm run db:seed
+npm run start:dev
+```
+
+### 3. Vérifier l'API (autre terminal)
 
 ```bash
 curl http://127.0.0.1:3000/theory/categories
 ```
 
-Tests backend :
+### 4. Flutter (terminal 2 — racine du projet)
 
 ```bash
-# unitaires
-npm run test
-
-# e2e (configuration: test/jest-e2e.json)
-npm run test:e2e
-
-# couverture
-npm run test:cov
+cd ..
+flutter pub get
+flutter run
 ```
 
-## Base de données (PostgreSQL + Prisma)
+---
 
-Pré-requis : PostgreSQL installé et démarré.
+## Démarrage au quotidien
 
-Initialisation rapide (dev) :
+**Terminal 1 — API**
 
 ```bash
 cd backend
-cp .env.example .env   # puis éditer DATABASE_URL
-npm install
+npm run start:dev
+```
+
+**Terminal 2 — Flutter**
+
+```bash
+flutter run
+```
+
+---
+
+## Commandes utiles
+
+### Backend
+
+```bash
+cd backend
+npm run start:dev
+npm run build
+npm run db:generate
+npm run db:migrate
+npm run db:seed
+npm run db:studio
+npm run test
+npm run test:e2e
+```
+
+### Flutter
+
+```bash
+flutter pub get
+flutter run
+flutter test
+```
+
+---
+
+## Dépannage
+
+```bash
+# API ne répond pas
+curl http://127.0.0.1:3000/theory/categories
+
+# Base vide → re-seed
+cd backend
+npm run db:seed
+
+# Re-migrer + seed
+cd backend
 npm run db:migrate
 npm run db:seed
 ```
 
-Notes :
-- L'API lit **uniquement PostgreSQL** (Prisma) à l'exécution.
-- Les fichiers `backend/src/theory/data/*.json` servent **seulement** au seed (`npm run db:seed`).
-- Connexion : `DATABASE_URL` dans `backend/.env`.
+---
 
-## Organisation du projet
+## Organisation
 
-- `lib/` : code Flutter (features, core, ui)
-- `android/`, `ios/`, `macos/`, `windows/`, `linux/`, `web/` : plateformes natives
-- `backend/` : API NestJS (TypeScript)
-- `test/` : tests Dart/Flutter
-
+```
+lib/           → Flutter
+backend/       → NestJS + Prisma
+expliquation.md
+```
