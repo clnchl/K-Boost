@@ -101,8 +101,10 @@ flutter run
 cd backend
 npm run start:dev
 npm run build
+npm run build:render
 npm run db:generate
 npm run db:migrate
+npm run db:deploy
 npm run db:seed
 npm run db:studio
 npm run test
@@ -114,8 +116,55 @@ npm run test:e2e
 ```bash
 flutter pub get
 flutter run
+flutter run --dart-define=USE_PROD_API=true
 flutter test
 ```
+
+---
+
+## Déploiement (Render)
+
+Le lien Render (`https://k-boost.onrender.com`) est **l’API** (NestJS), pas l’interface Flutter.
+
+### Backend (Web Service)
+
+- **Root directory** : `backend`
+- **Build command** :
+
+```bash
+npm install && npm run build:render
+```
+
+- **Start command** :
+
+```bash
+npm run start:prod
+```
+
+### Base de données (PostgreSQL Render)
+
+- **`DATABASE_URL` (interne)** : utilisée par le Web Service sur Render (dans l’onglet Environment du service). Elle peut ressembler à `dpg-...-a:5432` et **n’est pas** accessible depuis ton PC.
+- **External Database URL (externe)** : utilisée **depuis ton PC** pour migrer/seed la base Render.
+
+#### Seed de la base Render (une seule fois)
+
+1. Render → PostgreSQL → *Connections* → copier **External Database URL**.
+2. Depuis ton PC :
+
+```powershell
+cd backend
+$env:DATABASE_URL="postgresql://..."   # External Database URL
+npm run db:deploy
+npm run db:seed
+```
+
+### Vérifier la prod
+
+```bash
+curl https://k-boost.onrender.com/theory/categories
+```
+
+> Render (plan gratuit) peut “sleep” : la première requête peut prendre 30–50 secondes.
 
 ---
 

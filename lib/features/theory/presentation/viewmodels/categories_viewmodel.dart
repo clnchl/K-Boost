@@ -1,5 +1,5 @@
-import 'package:flutter/foundation.dart' show kIsWeb, defaultTargetPlatform, TargetPlatform;
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import '../../../../core/api_config.dart';
 import '../../domain/entities/category.dart';
 import '../../domain/entities/word.dart';
 import '../../domain/entities/word_detail.dart';
@@ -11,18 +11,8 @@ import '../../data/datasources/theory_remote_datasource.dart';
 import '../../data/datasources/theory_remote_datasource_impl.dart';
 import '../../data/repositories/theory_repository_impl.dart';
 
-String _resolveBaseUrl() {
-  if (kIsWeb) {
-    return 'http://localhost:3000';
-  }
-  if (defaultTargetPlatform == TargetPlatform.android) {
-    return 'http://10.0.2.2:3000';
-  }
-  return 'http://127.0.0.1:3000';
-}
-
 final theoryRemoteDataSourceProvider = Provider<TheoryRemoteDataSource>((ref) {
-  return TheoryRemoteDataSourceImpl(baseUrl: _resolveBaseUrl());
+  return TheoryRemoteDataSourceImpl(baseUrl: ApiConfig.baseUrl);
 });
 
 // Repository - créé une seule fois

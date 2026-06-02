@@ -1,5 +1,4 @@
 /// <reference types="node" />
-import 'dotenv/config';
 import { PrismaClient } from '@prisma/client';
 import { readFile } from 'node:fs/promises';
 import { resolve } from 'node:path';
