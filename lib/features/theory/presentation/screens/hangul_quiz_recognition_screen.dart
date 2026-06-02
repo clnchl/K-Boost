@@ -1,21 +1,33 @@
+// Quiz Hangul (module Cours).
+//
+// Données : hangulQuizSessionProvider → API GET /courses/hangul/exercises/session?count=10
+// Le backend renvoie 10 exercices distincts ; cet écran les enchaîne sans retirer au hasard.
+// Le visuel (cartes, boutons, score) est resté identique à la version « front seul » du collègue.
+//
+// Voir expliquation.md §10–§15 pour l'architecture complète.
+
 import 'dart:math';
 
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 
-class HangulQuizAndRecognitionScreen extends StatefulWidget {
+import '../../../courses/domain/entities/hangul_exercise.dart';
+import '../../../courses/presentation/viewmodels/hangul_quiz_viewmodel.dart';
+
+class HangulQuizAndRecognitionScreen extends ConsumerStatefulWidget {
   const HangulQuizAndRecognitionScreen({super.key});
 
   @override
-  State<HangulQuizAndRecognitionScreen> createState() =>
+  ConsumerState<HangulQuizAndRecognitionScreen> createState() =>
       _HangulQuizAndRecognitionScreenState();
 }
 
 class _HangulQuizAndRecognitionScreenState
-    extends State<HangulQuizAndRecognitionScreen> {
-  static const int totalQuestions = 10;
+    extends ConsumerState<HangulQuizAndRecognitionScreen> {
   static const int pointsPerCorrectAnswer = 10;
 
-  late final _ExerciseSession _session = _ExerciseSession.random();
+  List<_ExerciseSession>? _questions;
+  late _ExerciseSession _session = _ExerciseSession.empty();
 
   int _currentIndex = 0;
   int _score = 0;
@@ -23,8 +35,23 @@ class _HangulQuizAndRecognitionScreenState
 
   String? _pendingSelected;
 
+  int get _totalQuestions => _questions?.length ?? 10;
+
+  /// Construit la liste des 10 questions une seule fois (ordre fixé par l'API).
+  void _initSession(List<HangulExercise> exercises) {
+    if (_questions != null) return;
+    final rnd = Random();
+    _questions = exercises
+        .map((e) => _ExerciseSession.fromExercise(e, rnd))
+        .toList();
+    _session = _questions!.first;
+  }
+
   void _startNextQuestion() {
-    if (_currentIndex >= totalQuestions - 1) {
+    final questions = _questions;
+    if (questions == null) return;
+
+    if (_currentIndex >= questions.length - 1) {
       _finishQuiz();
       return;
     }
@@ -32,7 +59,7 @@ class _HangulQuizAndRecognitionScreenState
     setState(() {
       _currentIndex++;
       _pendingSelected = null;
-      _session.regenerate();
+      _session = questions[_currentIndex];
     });
   }
 
@@ -48,7 +75,7 @@ class _HangulQuizAndRecognitionScreenState
         return AlertDialog(
           title: const Text('Quiz terminé'),
           content: Text(
-            'Score : $_score / ${totalQuestions * pointsPerCorrectAnswer}',
+            'Score : $_score / ${_totalQuestions * pointsPerCorrectAnswer}',
           ),
           actions: [
             TextButton(
@@ -100,6 +127,43 @@ class _HangulQuizAndRecognitionScreenState
 
   @override
   Widget build(BuildContext context) {
+    final exercisesAsync = ref.watch(hangulQuizSessionProvider);
+
+    return exercisesAsync.when(
+      loading: () => _buildShell(
+        child: const Center(child: CircularProgressIndicator()),
+      ),
+      error: (error, _) => _buildShell(
+        child: Center(child: Text('Erreur: $error')),
+      ),
+      data: (exercises) {
+        if (exercises.isEmpty) {
+          return _buildShell(
+            child: const Center(child: Text('Aucun exercice disponible.')),
+          );
+        }
+
+        _initSession(exercises);
+
+        return _buildShell(
+          child: Padding(
+            padding: const EdgeInsets.all(16.0),
+            child: _QuizCard(
+              session: _session,
+              onAnswer: _onSelectAnswer,
+              onNext: _onValidateAndNext,
+              isFinished: _isFinished,
+              pendingSelected: _pendingSelected,
+              currentQuestionIndex: _currentIndex,
+              totalQuestions: _totalQuestions,
+            ),
+          ),
+        );
+      },
+    );
+  }
+
+  Widget _buildShell({required Widget child}) {
     return Scaffold(
       body: SafeArea(
         child: Column(
@@ -123,7 +187,7 @@ class _HangulQuizAndRecognitionScreenState
                       ),
                     ),
                     Text(
-                      'Question ${_currentIndex + 1}/$totalQuestions',
+                      'Question ${_currentIndex + 1}/$_totalQuestions',
                       style: Theme.of(context).textTheme.titleMedium?.copyWith(
                         fontWeight: FontWeight.w800,
                       ),
@@ -140,20 +204,7 @@ class _HangulQuizAndRecognitionScreenState
                 ),
               ),
             ),
-            Expanded(
-              child: Padding(
-                padding: const EdgeInsets.all(16.0),
-                child: _QuizCard(
-                  session: _session,
-                  onAnswer: _onSelectAnswer,
-                  onNext: _onValidateAndNext,
-                  isFinished: _isFinished,
-                  pendingSelected: _pendingSelected,
-                  currentQuestionIndex: _currentIndex,
-                  totalQuestions: totalQuestions,
-                ),
-              ),
-            ),
+            Expanded(child: child),
           ],
         ),
       ),
@@ -275,196 +326,17 @@ class _ExerciseSession {
   String correctChoice;
   List<String> choices;
 
-  void regenerate() {
-    final next = _ExerciseSession.random();
-    title = next.title;
-    modeDescription = next.modeDescription;
-    prompt = next.prompt;
-    correctChoice = next.correctChoice;
-    choices = next.choices;
+  factory _ExerciseSession.empty() {
+    return _ExerciseSession(
+      title: '',
+      modeDescription: '',
+      prompt: '',
+      correctChoice: '',
+      choices: const [],
+    );
   }
 
-  static _ExerciseSession random() {
-    final rnd = Random();
-
-    // Banque élargie pour réduire les répétitions.
-    final exercises = <_ExerciseDefinition>[
-      // -------------------- QUIZZ : son -> hangul (a) --------------------
-      _ExerciseDefinition(
-        title: 'Quizz (son → hangul)',
-        modeDescription: 'Associe le son à la bonne syllabe hangul.',
-        prompt: 'Quel hangul correspond au son : "ga" ?',
-        correctChoice: '가',
-        choices: ['가', '나', '다', '라'],
-      ),
-      _ExerciseDefinition(
-        title: 'Quizz (son → hangul)',
-        modeDescription: 'Associe le son à la bonne syllabe hangul.',
-        prompt: 'Quel hangul correspond au son : "na" ?',
-        correctChoice: '나',
-        choices: ['가', '나', '다', '마'],
-      ),
-      _ExerciseDefinition(
-        title: 'Quizz (son → hangul)',
-        modeDescription: 'Associe le son à la bonne syllabe hangul.',
-        prompt: 'Quel hangul correspond au son : "da" ?',
-        correctChoice: '다',
-        choices: ['다', '라', '바', '사'],
-      ),
-      _ExerciseDefinition(
-        title: 'Quizz (son → hangul)',
-        modeDescription: 'Associe le son à la bonne syllabe hangul.',
-        prompt: 'Quel hangul correspond au son : "ra" ?',
-        correctChoice: '라',
-        choices: ['라', '마', '바', '다'],
-      ),
-      _ExerciseDefinition(
-        title: 'Quizz (son → hangul)',
-        modeDescription: 'Associe le son à la bonne syllabe hangul.',
-        prompt: 'Quel hangul correspond au son : "ma" ?',
-        correctChoice: '마',
-        choices: ['마', '나', '바', '사'],
-      ),
-      _ExerciseDefinition(
-        title: 'Quizz (son → hangul)',
-        modeDescription: 'Associe le son à la bonne syllabe hangul.',
-        prompt: 'Quel hangul correspond au son : "ba" ?',
-        correctChoice: '바',
-        choices: ['바', '다', '사', '라'],
-      ),
-      _ExerciseDefinition(
-        title: 'Quizz (son → hangul)',
-        modeDescription: 'Associe le son à la bonne syllabe hangul.',
-        prompt: 'Quel hangul correspond au son : "sa" ?',
-        correctChoice: '사',
-        choices: ['사', '다', '바', '아'],
-      ),
-      _ExerciseDefinition(
-        title: 'Quizz (son → hangul)',
-        modeDescription: 'Associe le son à la bonne syllabe hangul.',
-        prompt: 'Quel hangul correspond au son : "ah" ?',
-        correctChoice: '아',
-        choices: ['아', '나', '다', '라'],
-      ),
-
-      // -------------------- QUIZZ : jamo -> hangul (a) --------------------
-      _ExerciseDefinition(
-        title: 'Quizz (jamo → syllabe)',
-        modeDescription: 'Compose la syllabe à partir des jamo.',
-        prompt: 'Associe ㄱ + ㅏ → quel hangul ?',
-        correctChoice: '가',
-        choices: ['가', '나', '다', '바'],
-      ),
-      _ExerciseDefinition(
-        title: 'Quizz (jamo → syllabe)',
-        modeDescription: 'Compose la syllabe à partir des jamo.',
-        prompt: 'Associe ㄴ + ㅏ → quel hangul ?',
-        correctChoice: '나',
-        choices: ['나', '가', '다', '마'],
-      ),
-      _ExerciseDefinition(
-        title: 'Quizz (jamo → syllabe)',
-        modeDescription: 'Compose la syllabe à partir des jamo.',
-        prompt: 'Associe ㄷ + ㅏ → quel hangul ?',
-        correctChoice: '다',
-        choices: ['다', '라', '바', '사'],
-      ),
-      _ExerciseDefinition(
-        title: 'Quizz (jamo → syllabe)',
-        modeDescription: 'Compose la syllabe à partir des jamo.',
-        prompt: 'Associe ㄹ + ㅏ → quel hangul ?',
-        correctChoice: '라',
-        choices: ['라', '마', '바', '다'],
-      ),
-      _ExerciseDefinition(
-        title: 'Quizz (jamo → syllabe)',
-        modeDescription: 'Compose la syllabe à partir des jamo.',
-        prompt: 'Associe ㅁ + ㅏ → quel hangul ?',
-        correctChoice: '마',
-        choices: ['마', '바', '나', '다'],
-      ),
-      _ExerciseDefinition(
-        title: 'Quizz (jamo → syllabe)',
-        modeDescription: 'Compose la syllabe à partir des jamo.',
-        prompt: 'Associe ㅂ + ㅏ → quel hangul ?',
-        correctChoice: '바',
-        choices: ['바', '다', '사', '라'],
-      ),
-      _ExerciseDefinition(
-        title: 'Quizz (jamo → syllabe)',
-        modeDescription: 'Compose la syllabe à partir des jamo.',
-        prompt: 'Associe ㅅ + ㅏ → quel hangul ?',
-        correctChoice: '사',
-        choices: ['사', '다', '바', '아'],
-      ),
-      _ExerciseDefinition(
-        title: 'Quizz (jamo → syllabe)',
-        modeDescription: 'Compose la syllabe à partir des jamo.',
-        prompt: 'Associe ㅇ + ㅏ → quel hangul ? (아)',
-        correctChoice: '아',
-        choices: ['아', '나', '다', '라'],
-      ),
-
-      // -------------------- RECONNAISSANCE : hangul -> son --------------------
-      _ExerciseDefinition(
-        title: 'Reconnaissance (hangul → son)',
-        modeDescription: 'Reconnais la lecture correspondante à la syllabe.',
-        prompt: 'Quelle lecture correspond à : 가 ?',
-        correctChoice: 'ga',
-        choices: ['ga', 'na', 'da', 'ba'],
-      ),
-      _ExerciseDefinition(
-        title: 'Reconnaissance (hangul → son)',
-        modeDescription: 'Reconnais la lecture correspondante à la syllabe.',
-        prompt: 'Quelle lecture correspond à : 나 ?',
-        correctChoice: 'na',
-        choices: ['na', 'ga', 'da', 'ma'],
-      ),
-      _ExerciseDefinition(
-        title: 'Reconnaissance (hangul → son)',
-        modeDescription: 'Reconnais la lecture correspondante à la syllabe.',
-        prompt: 'Quelle lecture correspond à : 다 ?',
-        correctChoice: 'da',
-        choices: ['da', 'ra', 'ba', 'sa'],
-      ),
-      _ExerciseDefinition(
-        title: 'Reconnaissance (hangul → son)',
-        modeDescription: 'Reconnais la lecture correspondante à la syllabe.',
-        prompt: 'Quelle lecture correspond à : 라 ?',
-        correctChoice: 'ra',
-        choices: ['ra', 'ma', 'ba', 'da'],
-      ),
-      _ExerciseDefinition(
-        title: 'Reconnaissance (hangul → son)',
-        modeDescription: 'Reconnais la lecture correspondante à la syllabe.',
-        prompt: 'Quelle lecture correspond à : 마 ?',
-        correctChoice: 'ma',
-        choices: ['ma', 'na', 'ba', 'da'],
-      ),
-      _ExerciseDefinition(
-        title: 'Reconnaissance (hangul → son)',
-        modeDescription: 'Reconnais la lecture correspondante à la syllabe.',
-        prompt: 'Quelle lecture correspond à : 바 ?',
-        correctChoice: 'ba',
-        choices: ['ba', 'da', 'sa', 'ra'],
-      ),
-      _ExerciseDefinition(
-        title: 'Reconnaissance (hangul → son)',
-        modeDescription: 'Reconnais la lecture correspondante à la syllabe.',
-        prompt: 'Quelle lecture correspond à : 사 ?',
-        correctChoice: 'sa',
-        choices: ['sa', 'da', 'ba', 'ah'],
-      ),
-      _ExerciseDefinition(
-        title: 'Reconnaissance (hangul → son)',
-        modeDescription: 'Reconnais la lecture correspondante à la syllabe.',
-        prompt: 'Quelle lecture correspond à : 아 ?',
-        correctChoice: 'ah',
-        choices: ['ah', 'na', 'da', 'ra'],
-      ),
-    ];
-
-    final ex = exercises[rnd.nextInt(exercises.length)];
+  static _ExerciseSession fromExercise(HangulExercise ex, Random rnd) {
     final shuffledChoices = [...ex.choices]..shuffle(rnd);
 
     return _ExerciseSession(
@@ -475,20 +347,4 @@ class _ExerciseSession {
       choices: shuffledChoices,
     );
   }
-}
-
-class _ExerciseDefinition {
-  _ExerciseDefinition({
-    required this.title,
-    required this.modeDescription,
-    required this.prompt,
-    required this.correctChoice,
-    required this.choices,
-  });
-
-  final String title;
-  final String modeDescription;
-  final String prompt;
-  final String correctChoice;
-  final List<String> choices;
 }

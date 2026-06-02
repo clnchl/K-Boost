@@ -42,3 +42,14 @@ model WordDetail {
 
   @@map("word_details")
 }
+
+model HangulExercise {
+  id              String   @id
+  title           String
+  modeDescription String   @map("mode_description")
+  prompt          String
+  correctChoice   String   @map("correct_choice")
+  choices         String[]
+
+  @@map("hangul_exercises")
+}

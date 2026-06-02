@@ -1,6 +1,6 @@
-# Explication de la feature Theory — K-Boost
+# Explication des features K-Boost (Theory + Cours)
 
-Document préparé pour la soutenance : comment les fichiers s’articulent, comment les données circulent, et pourquoi l’architecture a été choisie ainsi.
+Document préparé pour la soutenance et pour l’équipe : comment les fichiers s’articulent, comment les données circulent, et pourquoi l’architecture a été choisie ainsi.
 
 ---
 
@@ -334,4 +334,214 @@ curl http://127.0.0.1:3000/theory/categories
 
 ---
 
-*Document généré pour le projet K-Boost — feature Theory.*
+# PARTIE 2 — Feature Cours (module Hangul + quiz)
+
+Cette partie documente le travail fait après la feature Theory : le module **Cours** créé en front par un collègue, puis branché sur le **backend** et PostgreSQL en gardant **le même visuel** à l’écran.
+
+---
+
+## 10. Vue d’ensemble Cours / Hangul
+
+### Parcours utilisateur
+
+1. **Apprentissage** → bouton **Cours** → `CoursScreen`
+2. Module **Hangul** → popup → **S'entraîner**
+3. `HangulQuizAndRecognitionScreen` : 10 questions, score, feedback ✅/❌
+
+### Avant / après branchement backend
+
+| Avant (front seul) | Après (architecture complète) |
+|--------------------|-------------------------------|
+| ~24 exercices **en dur** dans le fichier Dart | Exercices en **PostgreSQL** (`hangul_exercises`) |
+| Tirage aléatoire local, **doublons possibles** | API **session** : 10 questions **distinctes** par partie |
+| Impossible de modifier sans republier l’app | Ajout de questions via JSON + `db:seed` (ou admin plus tard) |
+
+---
+
+## 11. Schéma de données (table `hangul_exercises`)
+
+| Champ | Exemple | Rôle |
+|-------|---------|------|
+| `id` | `hangul-001` | Identifiant unique |
+| `title` | `Quizz (son → hangul)` | Titre affiché en haut de la carte |
+| `mode_description` | `Associe le son…` | Sous-titre pédagogique |
+| `prompt` | `Quel hangul correspond au son : "ga" ?` | Question |
+| `correct_choice` | `가` | Bonne réponse |
+| `choices` | `["가","나","다","라"]` | 4 propositions (mélangées côté app) |
+
+**Fichier seed (dev uniquement)** : `backend/src/courses/data/hangul_exercises.json`  
+→ importé par `prisma/seed.ts` (comme pour Theory).
+
+**Pourquoi en base et pas dans le Dart ?**
+
+- À long terme : beaucoup de modules (Voyage, École, etc.) → on ne charge **que** ce dont on a besoin.
+- Mise à jour du contenu **sans** nouvelle version sur les stores.
+- Même pattern que Theory → une seule façon de faire pour toute l’équipe.
+
+**Évolution prévue** (quand il y aura énormément de cours) :
+
+```
+CourseModule (ex: hangul, voyage)
+  └── Lesson
+        └── Exercise
+```
+
+L’endpoint actuel `/session?count=10` ne renverra que 10 lignes, pas toute la base.
+
+---
+
+## 12. Backend Cours — fichiers et rôles
+
+```
+backend/src/courses/
+├── courses.module.ts       # Regroupe controller + service
+├── courses.controller.ts   # Routes HTTP /courses/*
+├── courses.service.ts        # Logique + accès Prisma
+└── data/
+    └── hangul_exercises.json   # Données initiales (seed)
+```
+
+### Routes API
+
+| Méthode | Route | Usage |
+|---------|-------|--------|
+| GET | `/courses/hangul/exercises` | Liste **complète** (admin, debug, futur écran liste) |
+| GET | `/courses/hangul/exercises/session?count=10` | **Une partie de quiz** : N exercices aléatoires **sans doublon** |
+
+Test :
+
+```bash
+curl "http://127.0.0.1:3000/courses/hangul/exercises/session?count=10"
+```
+
+### `getHangulQuizSession(count)` — comment ça marche
+
+1. Charge tous les exercices Hangul (OK tant qu’il y en a quelques dizaines ; plus tard on filtrera par `moduleId`).
+2. **Mélange** la liste (algorithme Fisher-Yates dans le service).
+3. Retourne les **10 premiers** → 10 questions différentes pour cette partie.
+
+Chaque fois que l’utilisateur ouvre le quiz, Flutter appelle cette route → **nouvelle sélection**.
+
+---
+
+## 13. Flutter — feature `lib/features/courses/`
+
+Même **Clean Architecture** que Theory :
+
+```
+courses/
+├── domain/
+│   ├── entities/hangul_exercise.dart
+│   ├── repositories/courses_repository.dart      # contrat
+│   └── usecases/
+│       ├── get_hangul_exercises_usecase.dart       # liste complète
+│       └── get_hangul_quiz_session_usecase.dart    # une partie
+├── data/
+│   ├── models/hangul_exercise_model.dart           # fromJson
+│   ├── datasources/courses_remote_datasource_impl.dart
+│   └── repositories/courses_repository_impl.dart
+└── presentation/
+    └── viewmodels/hangul_quiz_viewmodel.dart       # providers Riverpod
+```
+
+L’écran quiz reste dans `lib/features/theory/presentation/screens/` (créé par le collègue) mais **consomme** les providers du module `courses`.
+
+---
+
+## 14. Riverpod — `hangul_quiz_viewmodel.dart`
+
+| Provider | Rôle |
+|----------|------|
+| `coursesRemoteDataSourceProvider` | Appels HTTP vers `/courses/...` |
+| `coursesRepositoryProvider` | Couche repository |
+| `getHangulQuizSessionUseCaseProvider` | Use case « obtenir une partie » |
+| `hangulQuizSessionProvider` | **Charge les 10 questions** à l’ouverture du quiz |
+
+**`autoDispose`** sur `hangulQuizSessionProvider` :
+
+- Quand l’utilisateur **quitte** l’écran quiz, le cache est libéré.
+- S’il relance « S'entraîner », un **nouvel** appel API est fait → nouvelles questions.
+
+---
+
+## 15. Écran quiz — logique (sans changer le visuel)
+
+Fichier : `hangul_quiz_recognition_screen.dart`
+
+### Flux
+
+```mermaid
+sequenceDiagram
+    participant U as Utilisateur
+    participant Q as HangulQuizScreen
+    participant P as hangulQuizSessionProvider
+    participant API as GET .../session?count=10
+    participant DB as PostgreSQL
+
+    U->>Q: Ouvre le quiz
+    Q->>P: watch (10 exercices)
+    P->>API: requête
+    API->>DB: SELECT + mélange
+    DB-->>Q: 10 questions fixes pour la partie
+    loop 10 questions
+        U->>Q: Choisit une réponse → Suivant
+        Q->>Q: Question suivante (pas de doublon)
+    end
+    Q->>U: Dialog score
+```
+
+### Points importants dans le code
+
+1. **`_initSession(exercises)`** : transforme les 10 `HangulExercise` en `_ExerciseSession` (choix mélangés pour l’affichage).
+2. **`_currentIndex`** : avance dans la liste **déjà tirée** (plus de `random()` à chaque « Suivant »).
+3. **Pas de doublon** dans une partie : la liste vient déjà dédoublonnée du backend.
+4. **UI inchangée** : mêmes `Card`, `OutlinedButton`, `SnackBar`, dialog de score.
+
+---
+
+## 16. Pourquoi les questions semblaient « toujours les mêmes »
+
+| Cause | Explication |
+|-------|-------------|
+| Petit catalogue | Seulement **24** exercices Hangul pour l’instant |
+| Ancien tirage | Random à **chaque** question → même exercice possible 2× dans la même partie |
+| Même banque | Toujours les mêmes 24 en base tant qu’on n’en ajoute pas |
+
+**Corrections apportées** : endpoint `/session` + enchaînement linéaire des 10 questions côté Flutter.
+
+**Pour plus de variété** : ajouter des lignes dans `hangul_exercises.json` puis `npm run db:seed`.
+
+---
+
+## 17. Checklist démo — module Cours
+
+```bash
+cd backend && npm run start:dev
+curl "http://127.0.0.1:3000/courses/hangul/exercises/session?count=10"
+flutter run
+```
+
+Dans l’app : **Apprentissage → Cours → Hangul → S'entraîner** → vérifier que les questions changent entre deux parties.
+
+---
+
+## 18. Fichiers à montrer — feature Cours
+
+| Ordre | Fichier | Message clé |
+|-------|---------|-------------|
+| 1 | `backend/prisma/schema.prisma` | Modèle `HangulExercise` |
+| 2 | `backend/src/courses/courses.controller.ts` | Route `/session` |
+| 3 | `backend/src/courses/courses.service.ts` | Mélange + limite à 10 |
+| 4 | `lib/features/courses/.../hangul_quiz_viewmodel.dart` | Providers |
+| 5 | `lib/.../hangul_quiz_recognition_screen.dart` | UI + déroulé du quiz |
+| 6 | `lib/.../cours_screen.dart` | Entrée module Hangul |
+
+---
+
+## 19. Phrase orale — feature Cours (30 s)
+
+> « Le module Cours Hangul utilisait d’abord des exercices codés en dur dans Flutter. On les a migrés vers PostgreSQL avec Prisma et une API NestJS, en gardant la même interface. Pour chaque partie, le client demande dix exercices aléatoires sans doublon via `/courses/hangul/exercises/session`. L’architecture reprend le même découpage que Theory : datasource, repository, use case, Riverpod. C’est prêt pour ajouter d’autres modules de cours sans alourdir l’application mobile. »
+
+---
+
+*Document K-Boost — features Theory et Cours (Hangul).*
