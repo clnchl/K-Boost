@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'features/theory/presentation/screens/theory_screen.dart';
+import 'features/theory/presentation/screens/apprentissage_screen.dart';
 
 void main() {
   runApp(
@@ -20,7 +20,7 @@ class KBoostApp extends StatelessWidget {
         colorScheme: ColorScheme.fromSeed(seedColor: Colors.green),
       ),
       debugShowCheckedModeBanner: false,
-      home: const TheoryScreen(),
+      home: const ApprentissageScreen(),
     );
   }
 }
