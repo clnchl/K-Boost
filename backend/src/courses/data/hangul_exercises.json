@@ -1,0 +1,194 @@
+[
+  {
+    "id": "hangul-001",
+    "title": "Quizz (son → hangul)",
+    "modeDescription": "Associe le son à la bonne syllabe hangul.",
+    "prompt": "Quel hangul correspond au son : \"ga\" ?",
+    "correctChoice": "가",
+    "choices": ["가", "나", "다", "라"]
+  },
+  {
+    "id": "hangul-002",
+    "title": "Quizz (son → hangul)",
+    "modeDescription": "Associe le son à la bonne syllabe hangul.",
+    "prompt": "Quel hangul correspond au son : \"na\" ?",
+    "correctChoice": "나",
+    "choices": ["가", "나", "다", "마"]
+  },
+  {
+    "id": "hangul-003",
+    "title": "Quizz (son → hangul)",
+    "modeDescription": "Associe le son à la bonne syllabe hangul.",
+    "prompt": "Quel hangul correspond au son : \"da\" ?",
+    "correctChoice": "다",
+    "choices": ["다", "라", "바", "사"]
+  },
+  {
+    "id": "hangul-004",
+    "title": "Quizz (son → hangul)",
+    "modeDescription": "Associe le son à la bonne syllabe hangul.",
+    "prompt": "Quel hangul correspond au son : \"ra\" ?",
+    "correctChoice": "라",
+    "choices": ["라", "마", "바", "다"]
+  },
+  {
+    "id": "hangul-005",
+    "title": "Quizz (son → hangul)",
+    "modeDescription": "Associe le son à la bonne syllabe hangul.",
+    "prompt": "Quel hangul correspond au son : \"ma\" ?",
+    "correctChoice": "마",
+    "choices": ["마", "나", "바", "사"]
+  },
+  {
+    "id": "hangul-006",
+    "title": "Quizz (son → hangul)",
+    "modeDescription": "Associe le son à la bonne syllabe hangul.",
+    "prompt": "Quel hangul correspond au son : \"ba\" ?",
+    "correctChoice": "바",
+    "choices": ["바", "다", "사", "라"]
+  },
+  {
+    "id": "hangul-007",
+    "title": "Quizz (son → hangul)",
+    "modeDescription": "Associe le son à la bonne syllabe hangul.",
+    "prompt": "Quel hangul correspond au son : \"sa\" ?",
+    "correctChoice": "사",
+    "choices": ["사", "다", "바", "아"]
+  },
+  {
+    "id": "hangul-008",
+    "title": "Quizz (son → hangul)",
+    "modeDescription": "Associe le son à la bonne syllabe hangul.",
+    "prompt": "Quel hangul correspond au son : \"a\" ?",
+    "correctChoice": "아",
+    "choices": ["아", "나", "다", "라"]
+  },
+  {
+    "id": "hangul-009",
+    "title": "Quizz (jamo → syllabe)",
+    "modeDescription": "Compose la syllabe à partir des jamo.",
+    "prompt": "Associe ㄱ + ㅏ → quel hangul ?",
+    "correctChoice": "가",
+    "choices": ["가", "나", "다", "바"]
+  },
+  {
+    "id": "hangul-010",
+    "title": "Quizz (jamo → syllabe)",
+    "modeDescription": "Compose la syllabe à partir des jamo.",
+    "prompt": "Associe ㄴ + ㅏ → quel hangul ?",
+    "correctChoice": "나",
+    "choices": ["나", "가", "다", "마"]
+  },
+  {
+    "id": "hangul-011",
+    "title": "Quizz (jamo → syllabe)",
+    "modeDescription": "Compose la syllabe à partir des jamo.",
+    "prompt": "Associe ㄷ + ㅏ → quel hangul ?",
+    "correctChoice": "다",
+    "choices": ["다", "라", "바", "사"]
+  },
+  {
+    "id": "hangul-012",
+    "title": "Quizz (jamo → syllabe)",
+    "modeDescription": "Compose la syllabe à partir des jamo.",
+    "prompt": "Associe ㄹ + ㅏ → quel hangul ?",
+    "correctChoice": "라",
+    "choices": ["라", "마", "바", "다"]
+  },
+  {
+    "id": "hangul-013",
+    "title": "Quizz (jamo → syllabe)",
+    "modeDescription": "Compose la syllabe à partir des jamo.",
+    "prompt": "Associe ㅁ + ㅏ → quel hangul ?",
+    "correctChoice": "마",
+    "choices": ["마", "바", "나", "다"]
+  },
+  {
+    "id": "hangul-014",
+    "title": "Quizz (jamo → syllabe)",
+    "modeDescription": "Compose la syllabe à partir des jamo.",
+    "prompt": "Associe ㅂ + ㅏ → quel hangul ?",
+    "correctChoice": "바",
+    "choices": ["바", "다", "사", "라"]
+  },
+  {
+    "id": "hangul-015",
+    "title": "Quizz (jamo → syllabe)",
+    "modeDescription": "Compose la syllabe à partir des jamo.",
+    "prompt": "Associe ㅅ + ㅏ → quel hangul ?",
+    "correctChoice": "사",
+    "choices": ["사", "다", "바", "아"]
+  },
+  {
+    "id": "hangul-016",
+    "title": "Quizz (jamo → syllabe)",
+    "modeDescription": "Compose la syllabe à partir des jamo.",
+    "prompt": "Associe ㅇ + ㅏ → quel hangul ? (아)",
+    "correctChoice": "아",
+    "choices": ["아", "나", "다", "라"]
+  },
+  {
+    "id": "hangul-017",
+    "title": "Reconnaissance (hangul → son)",
+    "modeDescription": "Reconnais la lecture correspondante à la syllabe.",
+    "prompt": "Quelle lecture correspond à : 가 ?",
+    "correctChoice": "ga",
+    "choices": ["ga", "na", "da", "ba"]
+  },
+  {
+    "id": "hangul-018",
+    "title": "Reconnaissance (hangul → son)",
+    "modeDescription": "Reconnais la lecture correspondante à la syllabe.",
+    "prompt": "Quelle lecture correspond à : 나 ?",
+    "correctChoice": "na",
+    "choices": ["na", "ga", "da", "ma"]
+  },
+  {
+    "id": "hangul-019",
+    "title": "Reconnaissance (hangul → son)",
+    "modeDescription": "Reconnais la lecture correspondante à la syllabe.",
+    "prompt": "Quelle lecture correspond à : 다 ?",
+    "correctChoice": "da",
+    "choices": ["da", "ra", "ba", "sa"]
+  },
+  {
+    "id": "hangul-020",
+    "title": "Reconnaissance (hangul → son)",
+    "modeDescription": "Reconnais la lecture correspondante à la syllabe.",
+    "prompt": "Quelle lecture correspond à : 라 ?",
+    "correctChoice": "ra",
+    "choices": ["ra", "ma", "ba", "da"]
+  },
+  {
+    "id": "hangul-021",
+    "title": "Reconnaissance (hangul → son)",
+    "modeDescription": "Reconnais la lecture correspondante à la syllabe.",
+    "prompt": "Quelle lecture correspond à : 마 ?",
+    "correctChoice": "ma",
+    "choices": ["ma", "na", "ba", "da"]
+  },
+  {
+    "id": "hangul-022",
+    "title": "Reconnaissance (hangul → son)",
+    "modeDescription": "Reconnais la lecture correspondante à la syllabe.",
+    "prompt": "Quelle lecture correspond à : 바 ?",
+    "correctChoice": "ba",
+    "choices": ["ba", "da", "sa", "ra"]
+  },
+  {
+    "id": "hangul-023",
+    "title": "Reconnaissance (hangul → son)",
+    "modeDescription": "Reconnais la lecture correspondante à la syllabe.",
+    "prompt": "Quelle lecture correspond à : 사 ?",
+    "correctChoice": "sa",
+    "choices": ["sa", "da", "ba", "a"]
+  },
+  {
+    "id": "hangul-024",
+    "title": "Reconnaissance (hangul → son)",
+    "modeDescription": "Reconnais la lecture correspondante à la syllabe.",
+    "prompt": "Quelle lecture correspond à : 아 ?",
+    "correctChoice": "a",
+    "choices": ["a", "na", "da", "ra"]
+  }
+]

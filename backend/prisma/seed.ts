@@ -27,6 +27,15 @@ type WordDetailJson = {
   exampleSentence: string;
 };
 
+type HangulExerciseJson = {
+  id: string;
+  title: string;
+  modeDescription: string;
+  prompt: string;
+  correctChoice: string;
+  choices: string[];
+};
+
 const baseDir = resolve(__dirname, '..');
 
 async function loadJson<T>(relativePath: string): Promise<T> {
@@ -101,6 +110,31 @@ async function main() {
         translation: detail.translation,
         grammaticalType: detail.grammaticalType,
         exampleSentence: detail.exampleSentence,
+      },
+    });
+  }
+
+  const hangulExercises = await loadJson<HangulExerciseJson[]>(
+    'src/courses/data/hangul_exercises.json',
+  );
+
+  for (const exercise of hangulExercises) {
+    await prisma.hangulExercise.upsert({
+      where: { id: exercise.id },
+      update: {
+        title: exercise.title,
+        modeDescription: exercise.modeDescription,
+        prompt: exercise.prompt,
+        correctChoice: exercise.correctChoice,
+        choices: exercise.choices,
+      },
+      create: {
+        id: exercise.id,
+        title: exercise.title,
+        modeDescription: exercise.modeDescription,
+        prompt: exercise.prompt,
+        correctChoice: exercise.correctChoice,
+        choices: exercise.choices,
       },
     });
   }
