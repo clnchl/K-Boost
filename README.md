@@ -158,11 +158,20 @@ npm run db:deploy
 npm run db:seed
 ```
 
-### Vérifier la prod
+### Vérifier la prod (Render) — rapide
 
-```bash
-curl https://k-boost.onrender.com/theory/categories
+Vérifie que l’API lit bien la base Postgres Render (données non vides) :
+
+```powershell
+# Théorie (table: categories)
+Invoke-RestMethod -Method Get -Uri 'https://k-boost.onrender.com/theory/categories' -TimeoutSec 30
+
+# Cours (table: hangul_exercises)
+Invoke-RestMethod -Method Get -Uri 'https://k-boost.onrender.com/courses/hangul/exercises?count=5' -TimeoutSec 30
 ```
+
+Si les réponses contiennent des éléments JSON (non vides), alors la BDD Render fonctionne.
+
 
 > Render (plan gratuit) peut “sleep” : la première requête peut prendre 30–50 secondes.
 
