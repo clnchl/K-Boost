@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:k_boost/features/theory/presentation/screens/theory_screen.dart';
-import 'package:k_boost/features/theory/presentation/screens/cours_screen.dart';
+import 'package:k_boost/features/apprentissage/theory/presentation/screens/theory_screen.dart';
+import 'package:k_boost/features/apprentissage/courses/presentation/screens/cours_screen.dart';
 
 
 

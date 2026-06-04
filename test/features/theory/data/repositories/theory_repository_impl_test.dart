@@ -1,8 +1,8 @@
 import 'package:flutter_test/flutter_test.dart';
 import 'package:mocktail/mocktail.dart';
-import 'package:k_boost/features/theory/data/repositories/theory_repository_impl.dart';
-import 'package:k_boost/features/theory/data/datasources/theory_remote_datasource.dart';
-import 'package:k_boost/features/theory/data/models/category_model.dart';
+import 'package:k_boost/features/apprentissage/theory/data/repositories/theory_repository_impl.dart';
+import 'package:k_boost/features/apprentissage/theory/data/datasources/theory_remote_datasource.dart';
+import 'package:k_boost/features/apprentissage/theory/data/models/category_model.dart';
 
 class MockTheoryRemoteDataSource extends Mock
     implements TheoryRemoteDataSource {}
