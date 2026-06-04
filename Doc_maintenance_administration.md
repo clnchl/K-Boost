@@ -70,14 +70,12 @@ L'application Flutter agit comme client mobile. Les requêtes sont envoyées à 
 Architecture générale :
 
 Application Flutter
-↓
+|
 API REST NestJS
-↓
+|
 Prisma ORM
-↓
+|
 Base PostgreSQL
-
-[Insérer ici un schéma d'architecture]
 
 ## Description des couches
 
