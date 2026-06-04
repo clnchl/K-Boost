@@ -1,5 +1,5 @@
 import 'package:flutter_test/flutter_test.dart';
-import 'package:k_boost/features/theory/domain/entities/word.dart';
+import 'package:k_boost/features/apprentissage/theory/domain/entities/word.dart';
 
 void main() {
   test('Word Entity stocke correctement les propriétés', () {

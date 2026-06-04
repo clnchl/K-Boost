@@ -1,5 +1,5 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import '../../../../core/api_config.dart';
+import '../../../../../core/api_config.dart';
 import '../../domain/entities/category.dart';
 import '../../domain/entities/word.dart';
 import '../../domain/entities/word_detail.dart';

@@ -11,8 +11,8 @@ import 'dart:math';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
-import '../../../courses/domain/entities/hangul_exercise.dart';
-import '../../../courses/presentation/viewmodels/hangul_quiz_viewmodel.dart';
+import '../../domain/entities/hangul_exercise.dart';
+import '../viewmodels/hangul_quiz_viewmodel.dart';
 
 class HangulQuizAndRecognitionScreen extends ConsumerStatefulWidget {
   const HangulQuizAndRecognitionScreen({super.key});

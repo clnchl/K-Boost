@@ -2,7 +2,7 @@ import 'dart:convert';
 
 import 'package:http/http.dart' as http;
 
-import '../../../../core/api_config.dart';
+import '../../../../../core/api_config.dart';
 import '../models/hangul_exercise_model.dart';
 import 'courses_remote_datasource.dart';
 
