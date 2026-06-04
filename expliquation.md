@@ -195,9 +195,7 @@ Les **Use Cases** sont petits : ils appellent le repository. Un Use Case = **une
 
 | Fichier | Rôle |
 |---------|------|
-| `screens/theory_screen.dart` | Écran principal : chips catégories + liste mots |
 | `screens/word_detail_screen.dart` | Détail d’un mot |
-| `screens/categories_screen.dart` | Écran alternatif (liste simple) |
 | `viewmodels/categories_viewmodel.dart` | **Providers Riverpod** (état + injection) |
 
 #### Providers Riverpod (fichier central pour l’état)
