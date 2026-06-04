@@ -17,7 +17,7 @@ class ApiConfig {
 
   static String _localBaseUrl() {
     if (kIsWeb) {
-      return 'http://localhost:3000';
+      return productionBaseUrl;
     }
     if (defaultTargetPlatform == TargetPlatform.android) {
       return 'http://10.0.2.2:3000';
