@@ -77,7 +77,7 @@ class CoursScreen extends StatelessWidget {
               'École',
             ].map((theme) {
               return Opacity(
-                opacity: 0.75,
+                opacity: 1.0, // Affiché normalement, mais le bouton est bloqué
                 child: Padding(
                   padding: const EdgeInsets.symmetric(vertical: 6),
                   child: ElevatedButton.icon(

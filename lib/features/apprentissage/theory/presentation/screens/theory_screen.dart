@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../viewmodels/categories_viewmodel.dart';
+import '../widgets/word_card.dart';
 import 'word_detail_screen.dart';
 
 class TheoryScreen extends ConsumerWidget {
@@ -17,7 +18,6 @@ class TheoryScreen extends ConsumerWidget {
       appBar: AppBar(title: const Text('Théorie')),
       body: Column(
         children: [
-          
           SizedBox(
             height: 60,
             child: categoriesAsync.when(
@@ -63,28 +63,19 @@ class TheoryScreen extends ConsumerWidget {
                   );
                 }
 
-                return ListView.builder(
+                return GridView.builder(
+                  padding: const EdgeInsets.fromLTRB(16, 8, 16, 16),
+                  gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
+                    crossAxisCount: 2,
+                    crossAxisSpacing: 12,
+                    mainAxisSpacing: 12,
+                    childAspectRatio: 1,
+                  ),
                   itemCount: words.length,
                   itemBuilder: (context, index) {
                     final word = words[index];
-                    return ListTile(
-                      title: Text(
-                        word.korean,
-                        style: const TextStyle(
-                          fontSize: 18,
-                          fontWeight: FontWeight.bold,
-                        ),
-                      ),
-                      subtitle: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          Text(
-                            word.romanisation,
-                            style: const TextStyle(fontStyle: FontStyle.italic),
-                          ),
-                          Text(word.translation),
-                        ],
-                      ),
+                    return WordCard(
+                      word: word,
                       onTap: () {
                         // Aller au détail du mot
                         Navigator.push(
