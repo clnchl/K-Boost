@@ -14,6 +14,7 @@ var __param = (this && this.__param) || function (paramIndex, decorator) {
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.TheoryController = void 0;
 const common_1 = require("@nestjs/common");
+const id_param_dto_1 = require("../common/dto/id-param.dto");
 const theory_service_1 = require("./theory.service");
 let TheoryController = class TheoryController {
     theoryService;
@@ -23,11 +24,11 @@ let TheoryController = class TheoryController {
     async getCategories() {
         return this.theoryService.getCategories();
     }
-    async getWordsByCategory(id) {
-        return this.theoryService.getWordsByCategory(id);
+    async getWordsByCategory(params) {
+        return this.theoryService.getWordsByCategory(params.id);
     }
-    async getWordDetail(id) {
-        return this.theoryService.getWordDetail(id);
+    async getWordDetail(params) {
+        return this.theoryService.getWordDetail(params.id);
     }
 };
 exports.TheoryController = TheoryController;
@@ -39,16 +40,16 @@ __decorate([
 ], TheoryController.prototype, "getCategories", null);
 __decorate([
     (0, common_1.Get)('categories/:id/words'),
-    __param(0, (0, common_1.Param)('id')),
+    __param(0, (0, common_1.Param)()),
     __metadata("design:type", Function),
-    __metadata("design:paramtypes", [String]),
+    __metadata("design:paramtypes", [id_param_dto_1.IdParamDto]),
     __metadata("design:returntype", Promise)
 ], TheoryController.prototype, "getWordsByCategory", null);
 __decorate([
     (0, common_1.Get)('words/:id'),
-    __param(0, (0, common_1.Param)('id')),
+    __param(0, (0, common_1.Param)()),
     __metadata("design:type", Function),
-    __metadata("design:paramtypes", [String]),
+    __metadata("design:paramtypes", [id_param_dto_1.IdParamDto]),
     __metadata("design:returntype", Promise)
 ], TheoryController.prototype, "getWordDetail", null);
 exports.TheoryController = TheoryController = __decorate([

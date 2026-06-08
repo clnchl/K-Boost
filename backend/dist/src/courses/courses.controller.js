@@ -15,6 +15,7 @@ Object.defineProperty(exports, "__esModule", { value: true });
 exports.CoursesController = void 0;
 const common_1 = require("@nestjs/common");
 const courses_service_1 = require("./courses.service");
+const hangul_session_query_dto_1 = require("./dto/hangul-session-query.dto");
 let CoursesController = class CoursesController {
     coursesService;
     constructor(coursesService) {
@@ -23,9 +24,8 @@ let CoursesController = class CoursesController {
     async getHangulExercises() {
         return this.coursesService.getHangulExercises();
     }
-    async getHangulQuizSession(count) {
-        const parsed = Number.parseInt(count ?? '10', 10);
-        return this.coursesService.getHangulQuizSession(Number.isNaN(parsed) ? 10 : parsed);
+    async getHangulQuizSession(query) {
+        return this.coursesService.getHangulQuizSession(query.count ?? 10);
     }
 };
 exports.CoursesController = CoursesController;
@@ -37,9 +37,9 @@ __decorate([
 ], CoursesController.prototype, "getHangulExercises", null);
 __decorate([
     (0, common_1.Get)('hangul/exercises/session'),
-    __param(0, (0, common_1.Query)('count')),
+    __param(0, (0, common_1.Query)()),
     __metadata("design:type", Function),
-    __metadata("design:paramtypes", [String]),
+    __metadata("design:paramtypes", [hangul_session_query_dto_1.HangulSessionQueryDto]),
     __metadata("design:returntype", Promise)
 ], CoursesController.prototype, "getHangulQuizSession", null);
 exports.CoursesController = CoursesController = __decorate([
