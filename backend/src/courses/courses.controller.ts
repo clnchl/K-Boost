@@ -1,6 +1,7 @@
 import { Controller, Get, Query } from '@nestjs/common';
 import { HangulExercise } from '@prisma/client';
 import { CoursesService } from './courses.service';
+import { HangulSessionQueryDto } from './dto/hangul-session-query.dto';
 
 // API REST du module Cours (préfixe /courses).
 // Quiz Hangul : préférer /hangul/exercises/session pour une partie (10 questions aléatoires).
@@ -15,11 +16,8 @@ export class CoursesController {
 
   @Get('hangul/exercises/session')
   async getHangulQuizSession(
-    @Query('count') count?: string,
+    @Query() query: HangulSessionQueryDto,
   ): Promise<HangulExercise[]> {
-    const parsed = Number.parseInt(count ?? '10', 10);
-    return this.coursesService.getHangulQuizSession(
-      Number.isNaN(parsed) ? 10 : parsed,
-    );
+    return this.coursesService.getHangulQuizSession(query.count ?? 10);
   }
 }
