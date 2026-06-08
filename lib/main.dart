@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'features/apprentissage/apprentissage_screen.dart';
+import 'features/apprentissage/presentation/screens/apprentissage_screen.dart';
 
 void main() {
   runApp(
